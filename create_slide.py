@@ -164,16 +164,5 @@ start=time.time()
 slide_1=create_slide(titles="combo chart")
 inputdata=input_data[(input_data['region-base'].isin(['Roanoke','West']))&(input_data['month'].between(7,9))]
 
-
-create_chart(inputdata,slide=slide_1,chart_type="line",values="Total-Volume",columns="month",index="region-base",chart_location=4.1,data_label=False)
-
-slide_2=create_slide(titles="combo 2")
-inputdata=input_data[(input_data['region-base']=='Roanoke')|(input_data['region-base']=='West')]
-create_chart(inputdata,slide=slide_2,chart_type="line",values="Total-Volume",columns="weekday",index="region-base",chart_location=3.1,data_label=False)
-create_chart(inputdata,slide=slide_2,chart_type="column",values="Total-Volume",columns="weekday",index="region-base",chart_location=3.3,data_label=False)
-
-slide_3=create_slide(titles="table")
-create_table(inputdata,slide=slide_3,values="Total-Volume",index="type-base",columns="year",table_location=2.1)
-create_table(inputdata,slide=slide_3,values="Total-Volume",index="type-base",columns="weekday",table_location=2.2)
 print(time.time()-start)
 prs.save("D:/test.pptx")
