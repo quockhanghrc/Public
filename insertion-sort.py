@@ -3,8 +3,6 @@
 from numpy.random import seed
 from numpy.random import randint
 
-
-
 # generate some integers
 
 value=list(randint(0,10,10))
