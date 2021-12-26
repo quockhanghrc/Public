@@ -20,4 +20,3 @@ for i in range(1,len(values)):
             values.insert(j,key)
             values.pop(i+1) 
             break
-            print(values)
