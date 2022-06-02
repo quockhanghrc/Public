@@ -1,0 +1,73 @@
+#get information from website and upload to DB for storage
+
+import pandas as pd
+from lxml import etree
+import requests
+import datetime
+from dateutil import *
+import pytz
+from sqlalchemy import create_engine
+
+def generate_todaystring():
+    return (datetime.datetime.today()).strftime('%d%m%Y')
+
+
+#get gold price
+url = "https://www.pnj.com.vn/blog/gia-vang/"
+html = requests.get(url).content
+df_list = pd.read_html(html,flavor='html5lib')
+
+gold_price=df_list[1]
+gold_price.columns=df_list[0].values.tolist()[0]
+gold_price['Base_date']=generate_todaystring()
+
+
+#get exchange rate - VCB
+import urllib3
+import xmltodict
+
+url = "https://portal.vietcombank.com.vn/Usercontrols/TVPortal.TyGia/pXML.aspx"
+response = requests.get(url)
+data = xmltodict.parse(response.content)
+
+short_data=(data['ExrateList']['Exrate'])
+currency_code=[]
+currency_name=[]
+buy=[]
+transfer=[]
+sell=[]
+
+for item in range(len(short_data)):
+    currency_code.append(short_data[item]['@CurrencyCode'])
+    currency_name.append(short_data[item]['@CurrencyName'])
+    
+    if short_data[item]['@Buy']=='-':
+        buy_currency=0
+    else:
+        buy_currency=float(short_data[item]['@Buy'].replace(',',''))
+    buy.append(buy_currency)
+    
+    if short_data[item]['@Transfer']=='-':
+        transfer_currency=0
+    else:
+        transfer_currency=float(short_data[item]['@Transfer'].replace(',',''))    
+    transfer.append(transfer_currency)
+    
+    if short_data[item]['@Sell']=='-':
+        sell_currency=0
+    else:
+        sell_currency=float(short_data[item]['@Sell'].replace(',',''))     
+    sell.append(sell_currency)
+    
+Exrate_df=pd.DataFrame([currency_code,currency_name,buy,transfer,sell]).transpose()
+Exrate_df.columns=['Currency_code','Currency_name','Buy','Transfer','Sell']
+Exrate_df['Base_date']=generate_todaystring()
+
+
+#Upload to MySQL DB
+def mysql_engine(user = 'root', password = '123456', host = 'localhost', port = '3306', database = 'world'):
+    engine = create_engine("mysql://{0}:{1}@{2}:{3}/{4}?charset=utf8".format(user, password, host, port, database))
+    return engine
+
+Exrate_df.to_sql('exrate',con=mysql_engine(),if_exists='replace')
+gold_price.to_sql('goldprice',con=mysql_engine(),if_exists='replace')
