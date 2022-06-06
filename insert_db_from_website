@@ -7,7 +7,7 @@ import datetime
 from dateutil import *
 import pytz
 from sqlalchemy import create_engine
-
+import investpy
 def generate_todaystring():
     return (datetime.datetime.today()).strftime('%d%m%Y')
 
@@ -18,8 +18,16 @@ html = requests.get(url).content
 df_list = pd.read_html(html,flavor='html5lib')
 
 gold_price=df_list[1]
-gold_price.columns=df_list[0].values.tolist()[0]
+gold_price.columns=['Type','Buy','Sell']
 gold_price['Base_date']=generate_todaystring()
+
+from sqlalchemy.dialects.mysql import insert
+
+def insert_on_duplicate(table, conn, keys, data_iter):
+    insert_stmt = insert(table.table).values(list(data_iter))
+    on_duplicate_key_stmt = insert_stmt.on_duplicate_key_update(insert_stmt.inserted)
+    conn.execute(on_duplicate_key_stmt)
+
 
 
 #get exchange rate - VCB
@@ -42,19 +50,19 @@ for item in range(len(short_data)):
     currency_name.append(short_data[item]['@CurrencyName'])
     
     if short_data[item]['@Buy']=='-':
-        buy_currency=0
+        buy_currency=float("nan") #nan for missing value
     else:
         buy_currency=float(short_data[item]['@Buy'].replace(',',''))
     buy.append(buy_currency)
     
     if short_data[item]['@Transfer']=='-':
-        transfer_currency=0
+        transfer_currency=float("nan")
     else:
         transfer_currency=float(short_data[item]['@Transfer'].replace(',',''))    
     transfer.append(transfer_currency)
     
     if short_data[item]['@Sell']=='-':
-        sell_currency=0
+        sell_currency=float("nan")
     else:
         sell_currency=float(short_data[item]['@Sell'].replace(',',''))     
     sell.append(sell_currency)
@@ -69,5 +77,39 @@ def mysql_engine(user = 'root', password = '123456', host = 'localhost', port = 
     engine = create_engine("mysql://{0}:{1}@{2}:{3}/{4}?charset=utf8".format(user, password, host, port, database))
     return engine
 
-Exrate_df.to_sql('exrate',con=mysql_engine(),if_exists='replace')
-gold_price.to_sql('goldprice',con=mysql_engine(),if_exists='replace')
+Exrate_df.to_sql('exrate',con=mysql_engine(),if_exists='append')
+gold_price.to_sql('goldprice',con=mysql_engine(),if_exists='append')
+
+
+# get vn indices/etfs
+
+start = (datetime.datetime.now() - datetime.timedelta(days=1)) .strftime("%d/%m/%Y")
+end  = datetime.datetime.now().strftime("%d/%m/%Y")
+vn_indices=investpy.get_indices(country='vietnam')
+
+
+
+for item in vn_indices['name']:  
+    try:
+        index_df = investpy.get_index_historical_data(index= item, country= 'vietnam'
+            ,from_date = start, to_date = end)
+        index_df['Name']=item
+        index_df.to_sql('vn_indices',con=mysql_engine()
+                        ,if_exists='append')
+        print('Updated data for '+item+' on '+end)
+    except:
+        print('No update data for '+item+' on '+end)
+        
+        
+        
+vn_etfs=investpy.get_etfs(country='vietnam')
+for item in vn_etfs['name']:  
+    try:
+        index_df = investpy.get_etf_historical_data(etf= item, country= 'vietnam'
+            ,from_date = start, to_date = end)
+        index_df['Name']=item
+        index_df.to_sql('vn_etfs',con=mysql_engine()
+                        ,if_exists='append')
+        print('Updated data for '+item+' on '+end)
+    except:
+        print('No update data for '+item+' on '+end)
