@@ -1,1 +1,19 @@
-Project that create online ML prediction pipeline
+Overview
+Create ML model serving pipeline with following components:
+
+Data source: Use iris dataset as training dataset.
+For serving, use Confluent Kafka to simulate training data base on their data schema
+With Confluent Kafka, see avro schema to self-define your own simulated data structure (column names, min/max value,... ) Link https://github.com/confluentinc/kafka-connect-datagen/tree/master/src/main/resources
+
+Model deployment: Google Vertex AI
+See notebooks - Deploy model into an endpoint
+
+Prediction control: Google Cloud Run
+See in cloud_run_src to modify input / output of prediction result
+
+Analytics package
+Storage: Google Cloud Storage
+Analytics / Monitoring: Google BigQuery, Looker Studio
+Store result for monitoring, analytics
+
+Sample: https://lookerstudio.google.com/reporting/36036a36-bb34-4a7b-84b0-d93047d54733
