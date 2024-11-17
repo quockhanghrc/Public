@@ -126,16 +126,16 @@ class data_pool:
     def generate_data_status(table_list):
 
         # Dummy implementations for external checks, replace with actual logic
-        check_snap_icore = dailysnap_check.check_dailysnap(source_system=None,table_list=table_list)
+        check_snap = dailysnap_check.check_dailysnap(source_system=None,table_list=table_list)
         check_dupnew = dailysnap_check.check_dup_new(source_system=None,table_list=table_list)
         df_checkpoint = exp_data_tracing.checkpoint_v1(exp_data_tracing.pre_checkpoint_input_dict)
 
 
         #Temporary comment out this -not yet
-        for df in [check_snap_icore, check_dupnew, df_checkpoint]:
+        for df in [check_snap, check_dupnew, df_checkpoint]:
             df['source_table'] = df['source_table'].str.replace(data_pool.remove_prefix(), '', regex=True)
 
-        df_data_status = pd.merge(check_snap_icore, check_dupnew, on='source_table', how='left')
+        df_data_status = pd.merge(check_snap, check_dupnew, on='source_table', how='left')
         df_data_status = pd.merge(df_data_status, df_checkpoint, on='source_table', how='left')
         df_data_status.fillna(value=1, inplace=True)
 
@@ -307,7 +307,7 @@ def job_name_flow_v3(logging=True):
   df_dailysnap['short_table']= df_dailysnap['Table'].str.replace(data_pool.remove_prefix(), '', regex=True)
   
   
-  report_list_dict=dailysnap_check.icore_dict
+  report_list_dict=dailysnap_check.data_dict
   report_list_dict.update(dailysnap_check.onep_dict)
   # Load pickle / Create new if not exist 
   pickle_path = f"data_pkl/data_pool_{datetime.now().strftime('%Y%m%d')}.pkl"
