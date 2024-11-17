@@ -160,8 +160,8 @@ class data_pool:
           df_tracing = df_tracing.iloc[:, [0, 1, -1]]
           df_tracing.columns = ['report', 'source_table', 'secondary_report']
   
-          exc_not_same_source = (df_tracing['report'].str.upper().str.startswith('ICORE') & df_tracing['secondary_report'].str.upper().str.startswith('1P')) | \
-                                (df_tracing['report'].str.upper().str.startswith('1P') & df_tracing['secondary_report'].str.upper().str.startswith('ICORE'))
+          exc_not_same_source = (df_tracing['report'].str.upper().str.startswith('core_data_source') & df_tracing['secondary_report'].str.upper().str.startswith('branch_data_source')) | \
+                                (df_tracing['report'].str.upper().str.startswith('branch_data_source') & df_tracing['secondary_report'].str.upper().str.startswith('core_data_source'))
           df_tracing = df_tracing[~exc_not_same_source]
   
           remove_strings = ['remove redundant prefix']
