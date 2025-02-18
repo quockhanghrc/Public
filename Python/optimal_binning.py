@@ -23,12 +23,12 @@ def calculate_iv(df, feature, target, bins):
     
     return grouped['iv'].sum(), grouped
 
-def grid_search_optimal_bins(df, feature, target, num_bins=5, min_bin_pct=0.05):
+def grid_search_optimal_bins(df, feature, target, num_bins=5, bin_multiplier=2,min_bin_pct=0.05):
     """Finds the optimal binning that maximizes IV using grid search, 
        with each bin containing at least min_bin_pct of total population."""
     
     # First, split the feature into num_bins * 2 bins
-    n_bins = num_bins * 2
+    n_bins = num_bins * bin_multiplier
     sorted_values = np.percentile(df[feature], np.linspace(0, 100, n_bins + 1)[1:-1])
     
     best_iv = -np.inf
