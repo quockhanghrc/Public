@@ -1,7 +1,5 @@
 import sys
 import os
-
-
 # Practice to measure data quality: data availability, data integrity
 # Certain sections are concealed to safeguard confidential information.
 
