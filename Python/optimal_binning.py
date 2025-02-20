@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 from itertools import combinations
 
+## Define the optimal binning with highest IV - use for logistic regression
+
 def calculate_iv(df, feature, target, bins):
     """Computes IV based on given bins and also returns the target rate in each bin."""
     # Ensure bin edges are unique before applying pd.cut
