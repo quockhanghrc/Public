@@ -17,7 +17,7 @@ order by molecule
 offset 0 rows
 fetch next 1 rows only)
 
- update dbo.[BK-ATC-Result]
+update dbo.[BK-ATC-Result]
  
 set atc=(select top 1 atc from dbo.[BK-ATC-Result]
 where molecule=@mol
