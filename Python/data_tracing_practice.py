@@ -2,11 +2,9 @@ import sys
 import os
 import pandas as pd
 
-
 ## Overview 
 # Use memorized approach to save resources on further data quality checks
 # Certain sections are concealed to safeguard confidential information.
-
 
 # data_list/report_list: full list of required data/report 
 # data_status/report_status: completed data/ report

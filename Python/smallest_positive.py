@@ -8,13 +8,10 @@ def smallest_positive(input):
         randomlist.append(n)
         
     randomlist.sort()
-    
-    
     flag_change=0
     flag_positive=0
     positive_random=[]
-    
-    
+
     for i in randomlist:
         if i>0:
             positive_random.append(i)
