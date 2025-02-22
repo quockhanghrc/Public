@@ -20,5 +20,5 @@ LOOP
 DBMS_SCHEDULER.SET_ATTRIBUTE
 ( V.JOB_NAME,
 ATTRIBUTE => 'start_date',
-value => sysdate + INTERVAL '1' minute);
+value => sysdate + INTERVAL '1' MINUTE);
 end LOOP;

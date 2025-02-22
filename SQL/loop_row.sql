@@ -1,6 +1,6 @@
 declare @loop_row INT
-declare @row_count int
-declare @loop_amount int
+declare @row_count INT
+declare @loop_amount INT
 set @loop_row=0
 set @loop_amount=(select count(count_atc_duplicate.molecule) from
 (select distinct molecule,count(distinct atc) as b from dbo.[BK-ATC-Result]
