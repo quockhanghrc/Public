@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 import requests
 import time
 
-
 input_n=input("Enter number of pages you need:")
 input_n=int(input_n)
 start=time.time()
