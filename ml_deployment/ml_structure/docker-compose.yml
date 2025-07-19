@@ -1,0 +1,41 @@
+# docker-compose.yml
+
+version: '3.8'
+
+services:
+  # The MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: predictions_db
+      MYSQL_USER: ml_user
+      MYSQL_PASSWORD: ml_password
+    ports:
+      # Map host port 3307 to container port 3306 to avoid conflicts
+      - "3307:3306"
+    volumes:
+      # This persists the database data on your host machine
+      - db_data:/var/lib/mysql
+
+  # Your Flask API Service
+  api:
+    build: .  # Build the image from the Dockerfile in the current directory
+    container_name: flask_api
+    restart: always
+    ports:
+      - "5001:5000"
+    depends_on:
+      - db  # This tells Docker to start the 'db' service before the 'api'
+    environment:
+      # Pass database credentials to the Flask app as environment variables
+      DB_HOST: db  # 'db' is the service name from above, Docker networking handles this!
+      DB_USER: ml_user
+      DB_PASSWORD: ml_password
+      DB_NAME: predictions_db
+
+volumes:
+  db_data:
+    driver: local
