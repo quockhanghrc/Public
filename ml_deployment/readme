@@ -2,3 +2,4 @@ Create simple flow when deploying model from training -> deployment -> store pre
 Components:
 - Python for training/deployment
 - Mysql to store data
+- DBeaver as UI to query data
