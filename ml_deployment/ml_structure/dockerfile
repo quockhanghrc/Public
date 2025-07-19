@@ -1,0 +1,24 @@
+# Dockerfile
+
+# 1. Use an official Python runtime as a parent image
+# Using 'slim' is a good practice for smaller image sizes
+FROM python:3.10.9-slim
+
+# 2. Set the working directory inside the container
+WORKDIR /app
+
+# 3. Copy the dependencies file first to leverage Docker's layer caching
+COPY requirements.txt .
+
+# 4. Install the dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 5. Copy the rest of the application files into the container
+COPY . .
+
+# 6. Expose the port the app runs on
+EXPOSE 5000
+
+# 7. Define the command to run the application using gunicorn
+# This is the command that will be executed when the container starts
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
