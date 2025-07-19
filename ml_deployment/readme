@@ -1,1 +1,4 @@
 Create simple flow when deploying model from training -> deployment -> store predicted results into DB for analytics 
+Components:
+- Python for training/deployment
+- Mysql to store data
