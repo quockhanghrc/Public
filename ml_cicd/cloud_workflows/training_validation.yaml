@@ -1,0 +1,208 @@
+# run_training_workflow.yaml
+# Purpose: This workflow orchestrates the training and validation of a machine learning model using Google Cloud AI Platform.
+# If the new model meets validation criteria, it is promoted to production; otherwise, the process is aborted.
+main:
+  params: [input]
+  steps:
+    - init:
+        assign:
+          - project_id: 
+          - location: 
+          - gcs_bucket: 
+          - timestamp: ${time.format(sys.now())}
+          - job_display_name: ${"mlp_training_" + timestamp}
+          - output_object: ${"models/" + job_display_name}
+          - model_output_dir: ${"gs://" + gcs_bucket + "/" + output_object}
+          - staging_dir: ${"gs://" + gcs_bucket + "/staging/" + job_display_name}
+          - evaluation_bq_table : "training_data"
+          - model_prod_dir : ${"gs://" + gcs_bucket + "/models/" + "v1"}
+          - metrics_gcs_object: ${model_output_dir + "/comparison_metrics.json"}
+          - function_url: "https://model-performance-record-XXXX.run.app"
+    - create_training_job:
+        call: googleapis.aiplatform.v1.projects.locations.customJobs.create
+        args:
+          parent: ${"projects/" + project_id + "/locations/" + location}
+          region: ${location}
+          body:
+            displayName: ${job_display_name}
+            jobSpec:
+              workerPoolSpecs:
+                - machineSpec:
+                    machineType: "n1-standard-4"
+                  replicaCount: 1
+                  containerSpec:
+                    imageUri: ${"asia-southeast2-docker.pkg.dev/" + project_id + "/bigquery-mlp-trainer-validate/bigquery-mlp-trainer-validate:v1"}
+                    command: ["python", "train.py"]
+                    args:
+                      - "--model-dir"
+                      - ${model_output_dir}
+                      - "--hidden-layer-sizes"
+                      - "128;64;32"
+                      - "--max-iter"
+                      - "1000"
+              baseOutputDirectory:
+                outputUriPrefix: ${staging_dir}
+        result: training_job
+        next: copy_model_prod_to_stage
+    # Copy current model on prod to staging, make sure it validates the current model
+    - copy_model_prod_to_stage:
+        call: googleapis.storage.v1.objects.copy
+        args:
+        # --- Source Information ---
+            sourceBucket: "gcp_data_store"
+            sourceObject: ${text.url_encode("ml_cicd/ml_file" + "/model.joblib")} # Path in the production folder
+        
+        # --- Destination Information ---
+
+            destinationBucket: ${gcs_bucket}
+            destinationObject: ${text.url_encode("models/v1/model.joblib")} # Path to the new model
+
+
+        # After this succeeds, we move on to copy the scaler.
+        next: copy_scaler_prod_to_stage
+
+    - copy_scaler_prod_to_stage:
+        call: googleapis.storage.v1.objects.copy
+        args:
+        # --- Source Information ---
+            sourceBucket: "gcp_data_store"
+            sourceObject: ${text.url_encode("ml_cicd/ml_file" + "/scaler.joblib")} # Path in the production folder
+        
+        # --- Destination Information ---
+
+            destinationBucket: ${gcs_bucket}
+            destinationObject: ${text.url_encode("models/v1/scaler.joblib")} # Path to the new model
+        next: validate_model
+
+    - validate_model:
+        call: googleapis.aiplatform.v1.projects.locations.customJobs.create
+        args:
+          parent: ${"projects/" + project_id + "/locations/" + location}
+          region: ${location}
+          body:
+            displayName: ${"validate_job_" + timestamp}
+            jobSpec:
+              serviceAccount: 
+              workerPoolSpecs:
+                - machineSpec:
+                    machineType: "n1-standard-4"
+                  replicaCount: 1
+                  containerSpec:
+                    imageUri: ${"asia-southeast2-docker.pkg.dev/" + project_id + "/bigquery-mlp-trainer-validate/bigquery-mlp-trainer-validate:v1"}
+                    command: ["python", "validate.py"]
+                    args:
+                      - "--project-id"
+                      - ${project_id}
+                      - "--new-model-dir"
+                      - ${model_output_dir}
+                      - "--old-model-dir"
+                      - ${model_prod_dir}
+                      - "--bq-eval-table"
+                      - ${evaluation_bq_table}
+                      - "--metrics-output-gcs-path"
+                      - ${model_output_dir + "/metrics.json"}
+                      - "--r2-improvement-threshold"
+                      - "0.01"
+
+        result: validation_job_result
+        next: get_validation_results # Proceed to the decision step
+
+    - get_validation_results:
+        call: googleapis.storage.v1.objects.get
+        args:
+            bucket: 
+            object: ${text.url_encode(output_object + "/metrics.json")}
+            alt: "media"
+        result: metrics_response
+        next: decision_gate
+
+    # --- STAGE 4: THE DECISION GATE ---
+    - decision_gate:
+        switch:
+          - condition:  '${metrics_response.promotion_flag == 1}'
+            next: copy_model_to_stage
+
+        next: log_success
+
+    - copy_model_to_stage:
+        call: googleapis.storage.v1.objects.copy
+        args:
+        # --- Source Information ---
+            sourceBucket: ${gcs_bucket}
+            sourceObject: ${text.url_encode(output_object + "/model.joblib")} # Path to the new model
+        
+        # --- Destination Information ---
+            destinationBucket: ${gcs_bucket}
+            destinationObject: ${text.url_encode("models/v2/model.joblib")} # Path in the production folder
+        # After this succeeds, we move on to copy the scaler.
+        next: copy_scaler_to_stage
+
+    - copy_scaler_to_stage:
+        call: googleapis.storage.v1.objects.copy
+        args:
+        # --- Source Information ---
+            sourceBucket: ${gcs_bucket}
+            sourceObject:  ${text.url_encode(output_object + "/scaler.joblib")} # Path to the new scaler
+        
+        # --- Destination Information ---
+            destinationBucket: ${gcs_bucket}
+            destinationObject:  ${text.url_encode("models/v2/scaler.joblib")} # Path in the production folder
+        next: copy_model_to_prod
+
+
+    - copy_model_to_prod:
+        call: googleapis.storage.v1.objects.copy
+        args:
+        # --- Source Information ---
+            sourceBucket: ${gcs_bucket}
+            sourceObject: ${text.url_encode(output_object + "/model.joblib")} # Path to the new model
+        
+        # --- Destination Information ---
+            destinationBucket: "gcp_data_store"
+            destinationObject: ${text.url_encode("ml_cicd/ml_file/model.joblib")} # Path in the production folder
+        # After this succeeds, we move on to copy the scaler.
+        next: copy_scaler_to_prod
+
+    - copy_scaler_to_prod:
+        call: googleapis.storage.v1.objects.copy
+        args:
+        # --- Source Information ---
+            sourceBucket: ${gcs_bucket}
+            sourceObject:  ${text.url_encode(output_object + "/scaler.joblib")} # Path to the new scaler
+        
+        # --- Destination Information ---
+            destinationBucket: "gcp_data_store"
+            destinationObject:  ${text.url_encode("ml_cicd/ml_file/scaler.joblib")} # Path in the production folder
+        next: log_success
+
+
+    - log_success:
+        call: http.post
+        args:
+          # The URL of the function we want to call
+          url: ${function_url}
+          
+          # This block handles authentication automatically and securely.
+          # The workflow gets an OIDC token for its service account and includes
+          # it in the request header. The Cloud Function validates this token.
+          auth:
+            type: OIDC
+            
+          # This is the JSON payload we are sending to the function.
+          # It must match what the Python code expects.
+          body:
+            json_path: ${"gs://"+ gcs_bucket + "/" + output_object + "/metrics.json"}
+            
+        # Store the entire response from the function in a variable
+        result: function_response
+
+    # ===============================================
+    # === STAGE 5: THE ABORTION STEP (FAILURE) ===
+    # ===============================================
+    - abort_and_log:
+        call: sys.log
+        args:
+            text: "ABORTED: New model did not meet validation criteria. Production model was not changed."
+            severity: "WARNING"
+        next: end
+
