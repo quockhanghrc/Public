@@ -8,6 +8,8 @@ The pipeline simulates an ML CI/CD workflow that:
 Tools:
 - Google Cloud Functions: to generate data, evaluate performance, record keeping
 - Google Cloud Workflows: to maintain training / validation flow
+- Model Registry: contains training / validation files - using docker 
 - Vertex AI Custom Training: to maintain training / validation scripts
 - Vertex AI Experiment: to store model performance
 - Google CLoud Storage / Google BigQuery / Looker Studio: data storage, analytics, reporting
+
