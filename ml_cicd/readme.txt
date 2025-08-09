@@ -13,3 +13,7 @@ Tools:
 - Vertex AI Experiment: to store model performance
 - Google CLoud Storage / Google BigQuery / Looker Studio: data storage, analytics, reporting
 
+Things can be improved:
+- More metrics on data drift evaluation (now just rmse, r2)
+- More advanced model performance tracking (now just basic information - training time, performance)
+- Refactor for less hard-code items
