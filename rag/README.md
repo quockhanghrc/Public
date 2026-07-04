@@ -87,6 +87,7 @@ Without this, the LLM would see these inputs and might generate a non-compliant 
 
 ### 2. Intent Classification (ML classifier)
 A `SentenceTransformer` + `LogisticRegression` model trained on banking intents (PASSWORD, TRANSFER, LOAN, CARD, ACCOUNT, etc.). This narrows the vector search to the relevant category, improving retrieval precision.
+Fine-tuning BERT is more advanced techniques but need huge efforts on system (CPU, GPU,...). Only consider if traditional ML not work well
 
 ### 3. RAG Retrieval (Qdrant vector search)
 Dense vector search against a Qdrant collection of banking FAQ documents. Uses `paraphrase-multilingual-MiniLM-L12-v2` embeddings. Returns top-K candidates (configurable via `RAG_TOP_K`).
