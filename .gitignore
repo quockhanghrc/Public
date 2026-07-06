@@ -1,0 +1,63 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+.gitkeep
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+
+# utils folder
+00_utils/
+/artifacts/*
+artifacts/
+# Build and package output
+build/
+dist/
+*.egg-info/
+.eggs/
+/selfie_image/
+/artifacts/
+# Test and coverage output
+.pytest_cache/
+.coverage
+htmlcov/
+
+
+# Environment and local config
+.env
+.env.*
+*.local
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Editor and IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Data files
+*.csv
+*.parquet
+*.xlsx
+*.npz
+*.joblib
+
+# Image files
+*.img
+*.jpg
+*.jpeg
+.png
+
+# Model pickle files
+*.pkl
+*.pt

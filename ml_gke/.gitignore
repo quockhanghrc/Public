@@ -1,0 +1,25 @@
+# Secrets & Credentials
+terraform/terraform.tfvars
+kafka_secrets/confluent.conf
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+.venv/
+venv/
+
+# Models
+models/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

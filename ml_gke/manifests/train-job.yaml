@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: credit-limit-training
+  namespace: card-approval-training
+spec:
+  template:
+    spec:
+      serviceAccountName: training-sa
+      containers:
+      - name: training-container
+        image: YOUR_ARTIFACT_REGISTRY/credit-limit-training:latest
+        command: ["python", "train_model.py"]
+        env:
+        - name: PROJECT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: pipeline-config
+              key: project_id
+        - name: MLFLOW_TRACKING_URI
+          value: "http://mlflow.mlflow:5000"
+        resources:
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+          limits:
+            cpu: "8"
+            memory: "16Gi"
+      restartPolicy: Never
+  backoffLimit: 1

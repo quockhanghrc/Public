@@ -1,0 +1,13 @@
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: train-job-monitoring
+  namespace: card-approval-training
+spec:
+  selector:
+    matchLabels:
+      job-name: credit-limit-training
+  endpoints:
+  - port: 8000
+    path: /metrics
+    interval: 10s

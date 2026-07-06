@@ -1,0 +1,67 @@
+{
+  "namespace": "io.confluent.examples.clients.cloud",
+  "name": "CreditApplication",
+  "type": "record",
+  "fields": [
+    {
+      "name": "annual_income",
+      "type": {
+        "type": "double",
+        "arg.properties": {
+          "range": {
+            "min": 25000.0,
+            "max": 150000.0
+          }
+        }
+      }
+    },
+    {
+      "name": "current_debt",
+      "type": {
+        "type": "double",
+        "arg.properties": {
+          "range": {
+            "min": 0.0,
+            "max": 50000.0
+          }
+        }
+      }
+    },
+    {
+      "name": "fico_score",
+      "type": {
+        "type": "int",
+        "arg.properties": {
+          "range": {
+            "min": 300,
+            "max": 850
+          }
+        }
+      }
+    },
+    {
+      "name": "active_credit_lines",
+      "type": {
+        "type": "int",
+        "arg.properties": {
+          "range": {
+            "min": 1,
+            "max": 15
+          }
+        }
+      }
+    },
+    {
+      "name": "past_due_incidents",
+      "type": {
+        "type": "int",
+        "arg.properties": {
+          "range": {
+            "min": 0,
+            "max": 5
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inference-bridge
+  namespace: card-approval-training
+  labels:
+    app: inference-bridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inference-bridge
+  template:
+    metadata:
+      labels:
+        app: inference-bridge
+    spec:
+      serviceAccountName: training-sa
+      containers:
+      - name: bridge-container
+        image: YOUR_ARTIFACT_REGISTRY/credit-limit-training:latest
+        command: ["python", "scripts/kafka_inference_bridge.py"]
+        env:
+        - name: PROJECT_ID
+          valueFrom:
+            configMapKeyRef:
+              name: pipeline-config
+              key: project_id
+        - name: BQ_DATASET
+          value: "inference_analytics"
+        - name: BQ_TABLE
+          value: "prediction_logs"
+        - name: INFERENCE_URL
+          value: "http://credit-limit-inference.card-approval-training.svc.cluster.local/predict"
+        - name: KAFKA_TOPIC
+          value: "credit-applications"
+        volumeMounts:
+        - name: kafka-secrets
+          mountPath: /app/kafka_secrets
+          readOnly: true
+      volumes:
+      - name: kafka-secrets
+        secret:
+          secretName: confluent-kafka-secrets
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: confluent-kafka-secrets
+  namespace: card-approval-training
+type: Opaque
+stringData:
+  confluent.conf: |
+    bootstrap.servers=YOUR_CONFLUENT_BOOTSTRAP_SERVER:9092
+    security.protocol=SASL_SSL
+    sasl.mechanisms=PLAIN
+    sasl.username=YOUR_CONFLUENT_API_KEY
+    sasl.password=YOUR_CONFLUENT_API_SECRET

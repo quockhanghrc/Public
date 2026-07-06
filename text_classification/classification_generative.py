@@ -356,7 +356,7 @@ def evaluate_zero_shot_fast(
 # ============================================================
 if __name__ == "__main__":
     # Load your data
-    df = pd.read_parquet("data/raw/articles.parquet")
+    df = pd.read_parquet("data/raw/train-00000-of-00132.parquet")
     print(f"Loaded {len(df):,} articles")
     print(f"Categories: {df['domain'].nunique()}")
     
