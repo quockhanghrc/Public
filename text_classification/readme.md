@@ -5,7 +5,7 @@
 * **Embedding Model:** PhoBERT-v2
 
 ### Current Approaches & Findings
-* **Hierarchical Attention Network (HAN):** Yields higher performance compared to the generative approach, but requires substantial GPU resources during the embedding conversion stage.
+* **Hierarchical Attention Network (HAN):** Yields higher performance compared to the generative approach, but requires substantial GPU resources during the embedding conversion stage. Finding an optimal maximum sentence threshold is a key factor in reducing both embedding generation overhead and overall training time.
 * **Generative (Zero-shot):** Tested as a baseline, showing lower performance compared to HAN.
 
 ### Next Steps / TODO
