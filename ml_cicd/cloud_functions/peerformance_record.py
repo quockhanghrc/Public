@@ -7,7 +7,6 @@ import json
 # Purpose: This Cloud Function logs performance metrics from a JSON file stored in Google Cloud Storage to an Vertex AI Experiment.
 # Its to monitor performance of model versions over time.
 
-
 @functions_framework.http
 def log_records(request):
     # Initialize your experiment settings.

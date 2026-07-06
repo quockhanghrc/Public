@@ -57,7 +57,6 @@ main:
             destinationBucket: ${gcs_bucket}
             destinationObject: ${text.url_encode("models/v1/model.joblib")} # Path to the new model
 
-
         # After this succeeds, we move on to copy the scaler.
         next: copy_scaler_prod_to_stage
 

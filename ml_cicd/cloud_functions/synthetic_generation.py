@@ -12,7 +12,6 @@ from sklearn.metrics import mean_squared_error, r2_score
 # Purpose: This module generates synthetic data points for regression tasks, simulating a dynamic target function with drifted coefficients.
 # It use unix timestamps to simulate a change in production over time, and it generates a specified number of data points with noise.
 
-
 def dynamic_true_function(features, coeffs, noise_level=0.0):
     """Calculates the target value based on dynamic coefficients."""
     # np.dot is a clean way to do: c1*v1 + c2*v2 + ... + intercept
@@ -79,7 +78,6 @@ def calculate_regression_metrics(y_true, y_pred):
 # Triggered from a message on a Cloud Pub/Sub topic.
 @functions_framework.cloud_event
 def hello_pubsub(cloud_event):
-
     #Load artifacts 
     noise_level=25
     base_unix=1754302543

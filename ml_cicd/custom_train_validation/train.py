@@ -12,7 +12,6 @@ from google.cloud import bigquery
 # Helper Functions
 # =============================================================================
 
-
 def upload_to_gcs(local_path, gcs_uri):
     """Uploads a local file to a GCS bucket."""
     # Example gcs_uri: "gs://your-bucket/models/job123/model.joblib"
@@ -33,9 +32,8 @@ def upload_to_gcs(local_path, gcs_uri):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # --- Input Data and Hyperparameters ---
-    parser.add_argument('--hidden-layer-sizes', type=str, default='64,32', help='Comma-separated integers for layer sizes')
+    parser.add_argument('--hidden-layer-sizes', type=str, default='128,64', help='Comma-separated integers for layer sizes')
     parser.add_argument('--max-iter', type=int, default=500)
-    
     # --- Output Location ---
     parser.add_argument(
         '--model-dir',
