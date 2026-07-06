@@ -274,6 +274,114 @@ def plot_confusion_with_attention(val_true, val_preds, attn_weights_all, label_e
     plt.tight_layout()
     plt.show()
 
+def analyze_cumulative_attention(val_attentions, val_masks, save_dir=None):
+    """
+    Analyze cumulative attention coverage.
+    
+    Shows: "How many sentences do you actually need?"
+    Generates: Cumulative coverage plot + Attention distribution plot
+    
+    Args:
+        val_attentions: (n_docs, max_sentences) attention weights
+        val_masks: (n_docs, max_sentences) mask (1=real sentence, 0=padding)
+        save_dir: If set, save plot to this directory
+    """
+    # Mask out padding
+    masked_attentions = val_attentions * val_masks
+    
+    # Per-document: cumulative attention by sentence POSITION
+    cumulative_by_position = np.cumsum(masked_attentions, axis=1)
+    avg_cumulative = np.mean(cumulative_by_position, axis=0)
+    
+    print(f"\n{'='*60}")
+    print(f"📊 CUMULATIVE ATTENTION COVERAGE")
+    print(f"{'='*60}")
+    print(f"\nBy reading first N sentences (in order), you capture:\n")
+    
+    for n in [1, 2, 3, 5, 8, 10, 12, 15, 20, 25, 30, val_attentions.shape[1]]:
+        if n <= len(avg_cumulative):
+            coverage = avg_cumulative[n-1] * 100
+            bar = '█' * int(coverage // 4)
+            print(f"   First {n:2d} sentences: {coverage:5.1f}% {bar}")
+    
+    # Find thresholds
+    print(f"\n💡 Optimal max_sentences recommendations:")
+    for target in [0.90, 0.95, 0.99]:
+        n_needed = int(np.argmax(avg_cumulative >= target) + 1)
+        print(f"   To capture {target:.0%} of decision: max_sentences = {n_needed}")
+    
+    # Diminishing returns point (where marginal gain < 0.5%)
+    diffs = np.diff(avg_cumulative)
+    elbow = None
+    for i in range(len(diffs)):
+        if diffs[i] < 0.005:
+            elbow = i + 1
+            break
+    
+    if elbow:
+        print(f"\n   ⚠️  Diminishing returns after {elbow} sentences")
+        print(f"      (each additional sentence adds <0.5% to decision)")
+        print(f"      → Consider reducing max_sentences from {val_attentions.shape[1]} to {elbow}")
+        print(f"      → Saves {(1 - elbow/val_attentions.shape[1])*100:.0f}% compute")
+    
+    # ---- Plot: Cumulative coverage + Attention distribution ----
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    
+    # Plot 1: Cumulative coverage curve
+    x = np.arange(1, len(avg_cumulative) + 1)
+    axes[0].plot(x, avg_cumulative * 100, 'b-o', linewidth=2, markersize=4)
+    axes[0].axhline(y=90, color='green', linestyle='--', alpha=0.7, label='90%')
+    axes[0].axhline(y=95, color='orange', linestyle='--', alpha=0.7, label='95%')
+    axes[0].axhline(y=99, color='red', linestyle='--', alpha=0.7, label='99%')
+    axes[0].set_xlabel('Number of Sentences (first N)')
+    axes[0].set_ylabel('Cumulative Decision Coverage (%)')
+    axes[0].set_title('How Many Sentences Do You Need?')
+    axes[0].legend()
+    axes[0].grid(True, alpha=0.3)
+    
+    # Plot 2: Attention per position (bar chart)
+    avg_attn = np.mean(masked_attentions, axis=0)
+    std_attn = np.std(masked_attentions, axis=0)
+    axes[1].bar(x, avg_attn * 100, yerr=std_attn * 100, capsize=3,
+                color='steelblue', alpha=0.7, edgecolor='white')
+    axes[1].set_xlabel('Sentence Position')
+    axes[1].set_ylabel('Average Attention Weight (%)')
+    axes[1].set_title('Attention Distribution by Position')
+    axes[1].grid(True, alpha=0.3, axis='y')
+    
+    plt.tight_layout()
+    if save_dir:
+        plt.savefig(os.path.join(save_dir, 'cumulative_attention.png'), dpi=150, bbox_inches='tight')
+    plt.show()
+    
+    # ---- Importance-sorted cumulative (bonus analysis) ----
+    sorted_attentions = np.sort(masked_attentions, axis=1)[:, ::-1]
+    cumulative_sorted = np.cumsum(sorted_attentions, axis=1)
+    avg_cumulative_sorted = np.mean(cumulative_sorted, axis=0)
+    
+    print(f"\n{'─'*60}")
+    print(f"📊 IMPORTANCE-SORTED (If you could pick best sentences)")
+    print(f"{'─'*60}")
+    print(f"\n   {'N':<5} {'By Position':<18} {'By Importance':<18} {'Gap':<10}")
+    print(f"   {'─'*5} {'─'*18} {'─'*18} {'─'*10}")
+    
+    for n in [1, 2, 3, 5, 8, 10]:
+        if n <= len(avg_cumulative):
+            pos = avg_cumulative[n-1] * 100
+            imp = avg_cumulative_sorted[n-1] * 100
+            gap = imp - pos
+            print(f"   {n:<5} {pos:<18.1f}% {imp:<18.1f}% {gap:<+10.1f}%")
+    
+    gap_5 = avg_cumulative_sorted[4] - avg_cumulative[4]
+    if gap_5 > 0.10:
+        print(f"\n   ⚠️  Large gap ({gap_5*100:.1f}%) at 5 sentences")
+        print(f"      → HAN attention is NOT finding the best sentences")
+        print(f"      → Model may need more training or different architecture")
+    else:
+        print(f"\n   ✅ Small gap → HAN is correctly identifying important sentences")
+    
+    return avg_cumulative
+
 # ============================================================
 # MAIN TRAINING SCRIPT
 # ============================================================
@@ -469,7 +577,22 @@ def main():
     
     # 3. Attention per class (optional)
     print(f"\n   📊 Aggregate attention by sentence position saved to 'attention_position_distribution.png'")
+
+    # ================================================================
+    # CUMULATIVE ATTENTION ANALYSIS (NEW)
+    # ================================================================
+    print(f"\n{'='*60}")
+    print(f"🔍 Cumulative Attention Analysis")
+    print(f"{'='*60}")
     
+    avg_cumulative = analyze_cumulative_attention(
+        val_attentions,
+        val_masks,
+        save_dir=MODEL_SAVE_DIR
+    )
+    
+    print(f"\n   📊 Cumulative attention chart saved to 'cumulative_attention.png'")
+
     # --- Training history plots ---
     fig, axes = plt.subplots(1, 2, figsize=(12, 4))
     
@@ -498,7 +621,7 @@ def main():
     print(f"   Confusion matrix: {os.path.join(MODEL_SAVE_DIR, 'confusion_matrix.png')}")
     print(f"   Training history: {os.path.join(MODEL_SAVE_DIR, 'training_history.png')}")
     print(f"   Attention distribution: {os.path.join(MODEL_SAVE_DIR, 'attention_position_distribution.png')}")
-
+    print(f"   Cumulative attention:  {os.path.join(MODEL_SAVE_DIR, 'cumulative_attention.png')}")
 
 # ============================================================
 # INFERENCE EXAMPLE
