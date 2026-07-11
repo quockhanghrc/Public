@@ -14,6 +14,7 @@ ENV/
 00_utils/
 /artifacts/*
 artifacts/
+movie_lens/data/*
 # Build and package output
 build/
 dist/
@@ -25,7 +26,6 @@ dist/
 .pytest_cache/
 .coverage
 htmlcov/
-
 
 # Environment and local config
 .env
@@ -48,15 +48,29 @@ Thumbs.db
 # Data files
 *.csv
 *.parquet
+*.tsv
+*.vec
 *.xlsx
 *.npz
+*.npy
 *.joblib
+*.base
+*.test
+u.data
+u.genre
+u.info
+u.item
+u.occupation
+u.user
+allbut.pl
+mku.sh
 
 # Image files
 *.img
 *.jpg
 *.jpeg
 .png
+
 
 # Model pickle files
 *.pkl
