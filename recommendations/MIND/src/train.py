@@ -6,7 +6,6 @@ Supports CPU and GPU (with mixed precision for GPU).
 
 import os
 import time
-from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -16,7 +15,7 @@ from sklearn.metrics import roc_auc_score
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Dataset
 
-from src.data import collate_fn, eval_collate_fn
+from src.data import collate_fn
 from src.model import NRMSModel
 
 
@@ -29,12 +28,19 @@ def train_one_epoch(
     epoch: int,
     grad_clip: float = 1.0,
     use_amp: bool = False,
+    max_steps: Optional[int] = None,
+    train_mode: str = "pointwise",
 ) -> float:
     """
-    Train the model for one epoch.
+    Train the model for one epoch (or up to max_steps batches).
+
+    Args:
+        max_steps: If None, train on all batches in the loader (default). If set,
+            stop after this many batches, then the caller advances to the next epoch
+            (the loader reshuffles since shuffle=True).
 
     Returns:
-        Average loss for the epoch.
+        Average loss over the trained batches.
     """
     model.train()
     total_loss = 0.0
@@ -42,30 +48,73 @@ def train_one_epoch(
 
     scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
 
-    for batch_idx, (history, candidates, labels) in enumerate(loader):
-        history = history.to(device)
-        candidates = candidates.to(device)
-        labels = labels.to(device)
+    # Total steps this epoch: either the step budget or the full loader length.
+    total_steps = max_steps if max_steps is not None else len(loader)
+    # Adaptive progress-print interval so we always see ~10+ updates per epoch,
+    # but at least every 100 steps (and never spammy for tiny step budgets).
+    print_interval = max(1, min(100, max(1, total_steps // 10)))
 
-        optimizer.zero_grad()
+    epoch_start = time.time()
+    for batch_idx, batch in enumerate(loader):
+        # Stop early if a step budget is set (partial-epoch training)
+        if max_steps is not None and num_batches >= max_steps:
+            break
 
-        with torch.amp.autocast("cuda", enabled=use_amp):
-            logits = model(history, candidates)
-            loss = criterion(logits, labels)
+        if train_mode == "listwise":
+            # batch = (history, candidates, labels, candidate_mask)
+            history, candidates, labels, candidate_mask = batch
+            history = history.to(device)
+            candidates = candidates.to(device)
+            labels = labels.to(device)
+            candidate_mask = candidate_mask.to(device)
 
-        scaler.scale(loss).backward()
-        scaler.unscale_(optimizer)
-        torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
-        scaler.step(optimizer)
-        scaler.update()
+            optimizer.zero_grad()
+            with torch.amp.autocast("cuda", enabled=use_amp):
+                scores = model.score_candidates(history, candidates, candidate_mask)
+                loss = model.impression_cross_entropy(scores, labels, candidate_mask)
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            # batch = (history, candidates, labels) — pointwise BCE
+            history, candidates, labels = batch
+            history = history.to(device)
+            candidates = candidates.to(device)
+            labels = labels.to(device)
+
+            optimizer.zero_grad()
+
+            with torch.amp.autocast("cuda", enabled=use_amp):
+                logits = model(history, candidates)
+                loss = criterion(logits, labels)
+
+            scaler.scale(loss).backward()
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+            scaler.step(optimizer)
+            scaler.update()
 
         total_loss += loss.item()
         num_batches += 1
+        step = num_batches  # 1-based step within this epoch
 
-        if batch_idx % 100 == 0 and batch_idx > 0:
+        # Print progress at adaptive intervals (and always at the final step).
+        if step % print_interval == 0 or step == total_steps:
+            avg_loss = total_loss / num_batches
+            elapsed = time.time() - epoch_start
+            steps_per_sec = step / elapsed if elapsed > 0 else 0.0
+            eta = (total_steps - step) / steps_per_sec if steps_per_sec > 0 else 0.0
+            # When max_steps is set, show "step/total_steps"; else "batch/len(loader)".
+            if max_steps is not None:
+                prog = f"Step {step}/{total_steps}"
+            else:
+                prog = f"Batch {step}/{total_steps}"
             print(
-                f"  Epoch {epoch} | Batch {batch_idx}/{len(loader)} "
-                f"| Loss: {total_loss / num_batches:.4f}"
+                f"  Epoch {epoch} | {prog} | Loss: {avg_loss:.4f} | "
+                f"{steps_per_sec:.2f} step/s | ETA {eta:.0f}s",
+                flush=True,
             )
 
     return total_loss / max(num_batches, 1)
@@ -101,7 +150,9 @@ def evaluate(
     """
     Evaluate the model on a dataset with per-impression metrics.
 
-    Expects loader to yield (gids, history, candidates, labels) from eval_collate_fn.
+    Expects loader to yield (history, candidates, labels, candidate_mask) from
+    impression_collate_fn. Scores ALL candidates of each impression in ONE
+    score_candidates call (user encoded once per impression — no redundant re-encoding).
 
     Args:
         return_raw: If True, returns a tuple (metrics, labels, scores) for report plots.
@@ -115,31 +166,53 @@ def evaluate(
     all_labels: List[int] = []
     all_scores: List[float] = []
 
-    # Per-impression grouping
-    group_scores: Dict[int, List[float]] = defaultdict(list)
-    group_labels: Dict[int, List[int]] = defaultdict(list)
+    # Per-impression metrics (each batch element is one impression)
+    impression_aucs, mrrs, ndcg5s, ndcg10s = [], [], [], []
 
-    for gids, history, candidates, labels in loader:
+    for history, candidates, labels, candidate_mask in loader:
         history = history.to(device)
         candidates = candidates.to(device)
         labels = labels.to(device)
+        candidate_mask = candidate_mask.to(device)
 
-        logits = model(history, candidates)
-        loss = criterion(logits, labels)
+        # (B_imp, max_cand) logits — user encoded ONCE per impression
+        logits = model.score_candidates(history, candidates, candidate_mask)
 
-        total_loss += loss.item()
-        num_batches += 1
+        # Masked BCE loss over valid candidates (preserves early-stopping signal)
+        valid = candidate_mask == 1
+        if valid.any():
+            loss = criterion(logits[valid], labels[valid])
+            total_loss += loss.item()
+            num_batches += 1
 
-        scores = torch.sigmoid(logits).cpu().numpy()
-        labels_np = labels.cpu().numpy()
-        gids_np = gids.cpu().numpy()
+        scores = torch.sigmoid(logits).detach().cpu().numpy()  # (B_imp, max_cand)
+        labels_np = labels.detach().cpu().numpy()
+        mask_np = candidate_mask.detach().cpu().numpy()
 
-        all_scores.extend(scores.tolist())
-        all_labels.extend(labels_np.tolist())
+        for i in range(scores.shape[0]):
+            m = int(mask_np[i].sum())
+            if m == 0:
+                continue
+            y_score = scores[i, :m]
+            y_true = labels_np[i, :m].astype(int)
 
-        for gid, sc, lb in zip(gids_np, scores, labels_np):
-            group_scores[gid].append(float(sc))
-            group_labels[gid].append(int(lb))
+            all_scores.extend(y_score.tolist())
+            all_labels.extend(y_true.tolist())
+
+            if len(np.unique(y_true)) < 2:
+                continue
+            try:
+                impression_aucs.append(roc_auc_score(y_true, y_score))
+            except Exception:
+                pass
+            # MRR: reciprocal rank of first positive
+            paired = sorted(zip(y_score, y_true), key=lambda x: -x[0])
+            for rank, (_, lbl) in enumerate(paired, start=1):
+                if lbl == 1:
+                    mrrs.append(1.0 / rank)
+                    break
+            ndcg5s.append(ndcg_at_k(y_true, y_score, 5))
+            ndcg10s.append(ndcg_at_k(y_true, y_score, 10))
 
     avg_loss = total_loss / max(num_batches, 1)
 
@@ -150,31 +223,6 @@ def evaluate(
         global_auc = 0.5
     else:
         global_auc = roc_auc_score(all_labels_arr, all_scores_arr)
-
-    # Per-impression metrics
-    impression_aucs, mrrs, ndcg5s, ndcg10s = [], [], [], []
-    for gid in group_scores:
-        y_true = group_labels[gid]
-        y_score = group_scores[gid]
-        unique = np.unique(y_true)
-        if len(unique) < 2:
-            continue
-
-        try:
-            impression_aucs.append(roc_auc_score(y_true, y_score))
-        except Exception:
-            pass
-
-        # MRR: reciprocal rank of first positive
-        paired = sorted(zip(y_score, y_true), key=lambda x: -x[0])
-        for rank, (_, lbl) in enumerate(paired, start=1):
-            if lbl == 1:
-                mrrs.append(1.0 / rank)
-                break
-
-        # nDCG
-        ndcg5s.append(ndcg_at_k(y_true, y_score, 5))
-        ndcg10s.append(ndcg_at_k(y_true, y_score, 10))
 
     avg_impression_auc = float(np.mean(impression_aucs)) if impression_aucs else 0.5
     avg_mrr = float(np.mean(mrrs)) if mrrs else 0.0
