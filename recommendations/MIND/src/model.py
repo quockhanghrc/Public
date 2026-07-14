@@ -388,8 +388,12 @@ class CNNNewsEncoder(nn.Module, NewsEncoderBase):
         # Category / subcategory conditioning (Options 1 & 2).
         cat_vec = None
         if self.category_mode in ("concat", "cross") and news_categories is not None:
-            ce = self.cat_embed(news_categories[news_ids])        # (B, cat_embed_dim)
-            se = self.subcat_embed(news_subcategories[news_ids])  # (B, subcat_embed_dim)
+            # Clamp to >= 0 so padding (-1, index 0) maps to the embedding's
+            # padding_idx=0 instead of raising an index-out-of-range error.
+            cat_idx = news_categories[news_ids].clamp_min(0)
+            subcat_idx = news_subcategories[news_ids].clamp_min(0)
+            ce = self.cat_embed(cat_idx)        # (B, cat_embed_dim)
+            se = self.subcat_embed(subcat_idx)  # (B, subcat_embed_dim)
             cat_vec = torch.cat([ce, se], dim=-1)               # (B, cat_total)
             # Both modes broadcast the category signal across the title sequence and
             # concatenate it to word_vecs BEFORE the transformer blocks, because the
@@ -515,6 +519,8 @@ class UserEncoder(nn.Module):
         news_title_tokens: torch.Tensor,
         history_mask: Optional[torch.Tensor] = None,
         return_attention: bool = False,
+        news_categories: Optional[torch.Tensor] = None,
+        news_subcategories: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         """
         Args:
@@ -723,6 +729,8 @@ class NRMSModel(nn.Module):
         """
         B, num_cand = candidates.shape
         news_tokens = self.news_title_tokens
+        cat = getattr(self, "news_categories", None)
+        sub = getattr(self, "news_subcategories", None)
 
         # Encode user once per impression
         user_vec = self.user_encoder(
@@ -731,8 +739,6 @@ class NRMSModel(nn.Module):
         )  # (B, D)
 
         # Encode all candidates in one batched pass
-        cat = getattr(self, "news_categories", None)
-        sub = getattr(self, "news_subcategories", None)
         flat_candidates = candidates.view(-1)  # (B * num_cand)
         candidate_vecs = self.news_encoder(
             flat_candidates, news_tokens,
@@ -775,6 +781,8 @@ class NRMSModel(nn.Module):
         """
         B, num_cand = candidates.shape
         news_tokens = self.news_title_tokens
+        cat = getattr(self, "news_categories", None)
+        sub = getattr(self, "news_subcategories", None)
 
         # Encode user once per impression (also grab history attention weights)
         user_vec, history_weights = self.user_encoder(
@@ -783,8 +791,6 @@ class NRMSModel(nn.Module):
         )  # (B, D), (B, max_history_len)
 
         # Encode all candidates in one batched pass
-        cat = getattr(self, "news_categories", None)
-        sub = getattr(self, "news_subcategories", None)
         flat_candidates = candidates.view(-1)  # (B * num_cand)
         candidate_vecs = self.news_encoder(
             flat_candidates, news_tokens,
