@@ -245,15 +245,26 @@ def main():
     os.makedirs(args.checkpoint_dir, exist_ok=True)
     print(f"Run folder: {os.path.abspath(args.checkpoint_dir)}")
 
-    # Resolve data paths relative to script location
+    # Resolve data paths relative to script location.
+    # Tries, in order:
+    #   1. the path as given (relative to cwd)
+    #   2. <script_dir>/<path>            (e.g. MIND/MINDsmall_train/...)
+    #   3. <script_dir>/data/<path>       (local layout: MIND/data/MINDsmall_train/...)
+    #   4. /data/<path>                   (Modal Volume mount: /data/MINDsmall_train/...)
+    # This keeps the documented defaults (MINDsmall_train/...) valid for both the
+    # local folder (data/MINDsmall_train) and the Modal GPU run (/data/MINDsmall_train).
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
     def resolve(path: str) -> str:
-        if os.path.isfile(path):
-            return path
-        candidate = os.path.join(script_dir, path)
-        if os.path.isfile(candidate):
-            return candidate
+        candidates = [
+            path,
+            os.path.join(script_dir, path),
+            os.path.join(script_dir, "data", path),
+            os.path.join("/data", path),
+        ]
+        for cand in candidates:
+            if os.path.isfile(cand):
+                return cand
         return path
 
     train_behaviors = resolve(args.train_behaviors)

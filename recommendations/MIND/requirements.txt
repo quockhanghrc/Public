@@ -1,0 +1,28 @@
+# NRMS on MIND — Python dependencies
+#
+# Two groups:
+#  - CORE: always needed for the default run (random word embeddings, no HF).
+#  - HF (pinned): only needed for --use_hf_embeddings. The pair is pinned to a
+#    mutually-compatible set (transformers 4.54.0 requires huggingface_hub >= 0.25).
+#    The local env may have an incompatible transformers/huggingface_hub pair, which
+#    is why src/embeddings.py imports transformers lazily — the default run works
+#    without it.
+#
+# NOTE: torch is left unpinned here. The local env uses torch 2.8.0 (CPU); the Modal
+# image (run_nrms_mind.py) installs torch==2.3.0+cu121 from the pytorch index. Install
+# the torch build that matches your hardware (CPU or CUDA).
+
+# --- Core (default run) ---
+numpy
+pandas
+scikit-learn
+matplotlib
+torch
+
+# --- HuggingFace pretrained embeddings (--use_hf_embeddings) ---
+transformers==4.54.0
+huggingface_hub==0.34.2
+sentence-transformers
+
+# --- Tests ---
+pytest

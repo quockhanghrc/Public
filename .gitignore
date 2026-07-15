@@ -9,6 +9,11 @@ venv/
 env/
 ENV/
 
+# Local secrets & logs (MIND project) — never commit credentials
+recommendations/MIND/secrets_local.py
+recommendations/MIND/*.log
+recommendations/MIND/checkpoints/
+recommendations/MIND/cache/
 
 # utils folder
 00_utils/
@@ -75,3 +80,6 @@ mku.sh
 # Model pickle files
 *.pkl
 *.pt
+
+# Secret files
+secrets_local.py

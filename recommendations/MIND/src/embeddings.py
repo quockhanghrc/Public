@@ -19,7 +19,12 @@ import os
 
 import numpy as np
 import torch
-from transformers import AutoModel, AutoTokenizer
+
+# NOTE: `transformers` is imported LAZILY inside load_hf_embeddings() (not at module
+# top-level) so that the default NRMS run (random word embeddings, no --use_hf_embeddings)
+# works even when `transformers` is not installed. The installed environment may have an
+# incompatible transformers/huggingface_hub pair, and importing it here would crash the
+# whole project at import time (main.py imports this module unconditionally).
 
 
 def _infer_hidden_size(model, tokenizer) -> int:
@@ -61,6 +66,16 @@ def load_hf_embeddings(
         model's hidden size (used to auto-set the NRMS embedding dim).
     """
     os.makedirs(cache_dir, exist_ok=True)
+    # Lazy import: only required when pretrained HF embeddings are actually used.
+    try:
+        from transformers import AutoModel, AutoTokenizer
+    except ImportError as _e:  # pragma: no cover - environment-dependent
+        raise ImportError(
+            "HuggingFace `transformers` is required for --use_hf_embeddings but is "
+            "not installed (or its version is incompatible with huggingface_hub). "
+            "Install it with: pip install -r requirements.txt  "
+            f"(original error: {_e})"
+        )
     print(f"  Loading HuggingFace model '{model_name}' (cache_dir={cache_dir}) ...")
     tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=cache_dir)
     model = AutoModel.from_pretrained(model_name, cache_dir=cache_dir)
