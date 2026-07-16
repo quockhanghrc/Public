@@ -2,13 +2,16 @@
 Modal app for NRMS training on the MIND dataset (GPU).
 
 Design (see plan in /memories/session/plan.md):
-  - CODE is mirrored into the container via Image.copy_local_dir (rebuild on
+  - CODE is baked into the container image via Image.add_local_dir (rebuild on
     `modal run`/`deploy`), so local edits to src/ and main.py are reflected.
   - EMBEDDING MODELS (HuggingFace) are DOWNLOADED INSIDE the Modal app at runtime
     into a Volume-backed cache (/data/model_cache). They are NEVER uploaded from
     local. The cache persists across runs (downloaded once, reused after).
   - DATA + CHECKPOINTS + MODEL CACHE live on a persistent modal.Volume mounted at
-    /data, so outputs survive restarts and are pulled back with `modal volume get`.
+    /data inside the container. Outputs are persisted back to the Volume via
+    volume.batch_upload (force=True), which writes paths RELATIVE to /data — so on
+    the Volume the checkpoints live at /checkpoints/<run_name>/..., NOT
+    /data/checkpoints/... (that path does not exist on the Volume).
   - SECRETS are provided via the SECRET SLOT below — fill in later, no logic edits.
 
 Usage:
@@ -21,8 +24,15 @@ Usage:
   modal run --detach run_nrms_mind.py --run-name exp01 --epochs 5 --train-mode listwise
   modal run --detach run_nrms_mind.py --run-name exp02 --epochs 5 --use-hf-embeddings
 
-  # 2) pull checkpoints back later (from any machine) — they live on the Volume:
-  modal volume get nrms-mind-vol /data/checkpoints/exp01 ./checkpoints/exp01
+  # Category-aware variants (news category/subcategory conditioning; default
+  # category_mode is "none" = ignore). concat = append cat/subcat embeddings to
+  # each title-word vector; cross = category embedding cross-attends over words.
+  modal run --detach run_nrms_mind.py --run-name exp03 --epochs 5 --category-mode concat
+  modal run --detach run_nrms_mind.py --run-name exp04 --epochs 5 --category-mode cross
+
+  # Pull checkpoints back later (from any machine) — they live on the Volume at
+  # /checkpoints/<run_name> (NOTE: NOT /data/checkpoints/...):
+  modal volume get nrms-mind-vol /checkpoints/exp01 ./checkpoints/exp01
 """
 
 import io
@@ -106,8 +116,10 @@ volume = modal.Volume.from_name("nrms-mind-vol", create_if_missing=True)
 # Volume mount layout inside the container:
 #   /data/MINDsmall_train   (uploaded once, or present from a prior run)
 #   /data/MINDsmall_dev
-#   /data/checkpoints/<run_name>   (written by the run, pulled back locally)
+#   /data/checkpoints/<run_name>   (written by the run INSIDE the container)
 #   /data/model_cache               (HF models downloaded IN-APP, persisted)
+# NOTE: batch_upload writes paths relative to /data, so on the Volume these
+# appear at /checkpoints/<run_name>/... and /model_cache/... (NOT /data/...).
 
 
 def setup_secrets():
@@ -137,115 +149,191 @@ def setup_secrets():
               "rate-limited (pointwise/random-init still works).")
 
 
-@app.function(
-    image=image,
-    volumes={"/data": volume},
-    gpu="T4",                 # switch to "A10G" if 384-dim MiniLM + batch 128 needs more VRAM
-    timeout=3600 * 6,
-    cpu=2.0,
-    memory=8192,
-    secrets=[modal.Secret.from_name("hf-token-secret")],
-)
-def train(
-    run_name: str,
-    use_hf_embeddings: bool = False,
-    embed_model: str = "sentence-transformers/all-MiniLM-L6-v2",
-    epochs: int = 5,
-    train_mode: str = "listwise",
-    max_train_impressions: int = None,
-    max_dev_impressions: int = None,
-    in_time_val_frac: float = 0.0,
-    neg_samples: int = None,
-    use_amp: bool = False,
-    freeze_embeddings: bool = False,
-    bottleneck_dim: int = None,
-    category_mode: str = "none",
-    cat_embed_dim: int = 8,
-    subcat_embed_dim: int = 8,
-    extra_args: list = None,
-):
-    """Run NRMS training inside the Modal container.
+# ---------------------------------------------------------------------------
+# Per-phase functions. GPU is attached via the `train_phase` decorator
+# (gpu="L4") — the ONLY phase that needs it. `evaluate_phase` and `report_phase`
+# have NO gpu argument, so they run on CPU (matplotlib / inference only).
+# (We set gpu in the decorator rather than `with_options(gpu=...)` at call time,
+# which is version-sensitive across Modal client releases.)
+# ---------------------------------------------------------------------------
+_PHASE_TIMEOUT = 3600 * 6
+_PHASE_CPU = 2.0
+_PHASE_MEM = 8192 * 2
 
-    Code lives in /app (image-baked). Data + checkpoints + HF cache live in /data
-    (Volume). Embedding models are downloaded IN-APP into /data/model_cache.
-    """
-    os.chdir("/app")
 
-    # Ensure data is present on the Volume. If not uploaded yet, this is a clear
-    # signal to the user (they should `modal volume put` the MINDsmall folders once).
+def _warn_missing_data():
+    """Warn (non-fatal) if the MINDsmall data folders are absent on the Volume."""
     for d in ("MINDsmall_train", "MINDsmall_dev"):
         if not os.path.isdir(os.path.join("/data", d)):
             print(f"[data] WARNING: /data/{d} not found on the Volume. "
                   f"Upload it once with: modal volume put nrms-mind-vol "
                   f"<local {d}> /data/{d}")
 
+
+def _build_main_args(run_name: str, phase: str, params: dict) -> list:
+    """Build the `python main.py --phase <phase> ...` argv list from params."""
     args = [
         "python", "-u", "main.py",
+        "--phase", phase,
         "--run_name", run_name,
         "--checkpoint_dir", "/data/checkpoints",
         "--hf_cache", "/data/model_cache",
-        "--epochs", str(epochs),
-        "--train_mode", train_mode,
-        "--in_time_val_frac", str(in_time_val_frac),
+        "--epochs", str(params.get("epochs", 5)),
+        "--train_mode", params.get("train_mode", "listwise"),
+        "--in_time_val_frac", str(params.get("in_time_val_frac", 0.0)),
     ]
-    if max_train_impressions is not None:
-        args += ["--max_train_impressions", str(max_train_impressions)]
-    if max_dev_impressions is not None:
-        args += ["--max_dev_impressions", str(max_dev_impressions)]
-    if neg_samples is not None:
-        args += ["--neg_samples", str(neg_samples)]
-    if use_amp:
+    if params.get("max_train_impressions") is not None:
+        args += ["--max_train_impressions", str(params["max_train_impressions"])]
+    if params.get("max_dev_impressions") is not None:
+        args += ["--max_dev_impressions", str(params["max_dev_impressions"])]
+    if params.get("neg_samples") is not None:
+        args += ["--neg_samples", str(params["neg_samples"])]
+    if params.get("use_amp"):
         args += ["--use_amp"]
-    if bottleneck_dim is not None:
-        args += ["--bottleneck_dim", str(bottleneck_dim)]
-    if use_hf_embeddings:
-        args += ["--use_hf_embeddings", "--embed_model", embed_model]
-        if freeze_embeddings:
+    if params.get("bottleneck_dim") is not None:
+        args += ["--bottleneck_dim", str(params["bottleneck_dim"])]
+    if params.get("use_hf_embeddings"):
+        args += ["--use_hf_embeddings", "--embed_model",
+                 params.get("embed_model", "sentence-transformers/all-MiniLM-L6-v2")]
+        if params.get("freeze_embeddings"):
             args += ["--freeze_embeddings"]
-    if category_mode != "none":
-        args += ["--category_mode", category_mode,
-                 "--cat_embed_dim", str(cat_embed_dim),
-                 "--subcat_embed_dim", str(subcat_embed_dim)]
-    if extra_args:
-        args += list(extra_args)
+    if params.get("category_mode", "none") != "none":
+        args += ["--category_mode", params["category_mode"],
+                 "--cat_embed_dim", str(params.get("cat_embed_dim", 8)),
+                 "--subcat_embed_dim", str(params.get("subcat_embed_dim", 8))]
+    if params.get("batch_size") is not None:
+        args += ["--batch_size", str(params["batch_size"])]
+    if params.get("eval_batch_size") is not None:
+        args += ["--eval_batch_size", str(params["eval_batch_size"])]
+    return args
 
-    print("[train] Running:", " ".join(args))
+
+def _upload_run_artifacts(run_name: str, include_model_cache: bool = False):
+    """Persist run outputs to the Volume via batch_upload (paths relative to /data)."""
+    upload_dirs = [f"/data/checkpoints/{run_name}"]
+    if include_model_cache:
+        upload_dirs.append("/data/model_cache")
+    total = 0
+    with volume.batch_upload(force=True) as upload:
+        for d in upload_dirs:
+            if not os.path.isdir(d):
+                continue
+            for root, _, files in os.walk(d):
+                for fn in files:
+                    local_path = os.path.join(root, fn)
+                    rel = os.path.relpath(local_path, "/data")  # e.g. checkpoints/<run>/x.png
+                    upload.put_file(local_path, rel)
+                    total += 1
+    print(f"[upload] Uploaded {total} file(s) to Volume "
+          f"(checkpoints/{run_name}" + (" + model_cache" if include_model_cache else "") + ").")
+
+
+def _persist_error(run_name: str, phase: str, exc: Exception):
+    """Write a phase failure traceback to the Volume so it is inspectable later."""
+    import traceback
+    err_text = f"{phase.upper()} FAILED for run={run_name}\n\n{traceback.format_exc()}"
+    print(err_text, flush=True)
+    try:
+        with volume.batch_upload(force=True) as upload:
+            upload.put_file(io.BytesIO(err_text.encode("utf-8")),
+                            f"{phase}_error_{run_name}.txt")
+    except Exception as _e2:  # noqa: BLE001
+        print(f"[{phase}] Could not persist error file: {_e2}", flush=True)
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    gpu="L4",                 # the ONLY phase that requests a GPU
+    timeout=_PHASE_TIMEOUT,
+    cpu=_PHASE_CPU,
+    memory=_PHASE_MEM,
+    secrets=[modal.Secret.from_name("hf-token-secret")],
+)
+def train_phase(run_name: str, params: dict):
+    """TRAINING phase — the ONLY phase that needs a GPU (gpu="L4" in decorator)."""
+    os.chdir("/app")
+    _warn_missing_data()
+    args = _build_main_args(run_name, "train", params)
+    print("[train_phase] Running:", " ".join(args))
     try:
         subprocess.run(args, check=True)
+        # Upload checkpoints + (if used) the HF model cache so later runs skip the
+        # download. The cache lives on the Volume at /data/model_cache.
+        _upload_run_artifacts(run_name, include_model_cache=params.get("use_hf_embeddings", False))
+        print(f"[train_phase] Done. Checkpoints at /data/checkpoints/{run_name}")
+    except Exception as _e:  # noqa: BLE001
+        _persist_error(run_name, "train", _e)
+        raise
 
-        # Persist outputs to the Volume via the Volume API (batch_upload), which is
-        # reliable regardless of mount/commit behavior. We upload BOTH the run's
-        # checkpoints AND the HF model cache, so subsequent --use-hf-embeddings runs
-        # skip the download (the cache lives on the Volume at /data/model_cache).
-        upload_dirs = [f"/data/checkpoints/{run_name}", "/data/model_cache"]
-        total = 0
-        with volume.batch_upload(force=True) as upload:
-            for d in upload_dirs:
-                if not os.path.isdir(d):
-                    continue
-                for root, _, files in os.walk(d):
-                    for fn in files:
-                        local_path = os.path.join(root, fn)
-                        rel = os.path.relpath(local_path, "/data")  # e.g. checkpoints/<run>/x.png
-                        upload.put_file(local_path, rel)
-                        total += 1
-        print(f"[train] Uploaded {total} file(s) to Volume "
-              f"(checkpoints/{run_name} + model_cache).")
-        print(f"[train] Done. Checkpoints at /data/checkpoints/{run_name}")
-    except Exception as _e:  # noqa: BLE001 - capture failures so they are inspectable
-        import traceback
-        err_text = f"TRAIN FAILED for run={run_name}\n\n{traceback.format_exc()}"
-        print(err_text, flush=True)
-        # Persist the error so it is visible even from a detached/spawned run
-        # (whose stdout is otherwise discarded). Read it back with:
-        #   modal volume get nrms-mind-vol /train_error_{run_name}.txt .
-        try:
-            with volume.batch_upload(force=True) as upload:
-                upload.put_file(io.BytesIO(err_text.encode("utf-8")),
-                                f"train_error_{run_name}.txt")
-        except Exception as _e2:  # noqa: BLE001
-            print(f"[train] Could not persist error file: {_e2}", flush=True)
-        raise  # re-raise so the Modal function still reports failure
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=_PHASE_TIMEOUT,
+    cpu=_PHASE_CPU,
+    memory=_PHASE_MEM,
+    secrets=[modal.Secret.from_name("hf-token-secret")],
+)
+def evaluate_phase(run_name: str, params: dict):
+    """EVALUATION phase — CPU only (loads best_model.pt, runs final eval + attribution)."""
+    os.chdir("/app")
+    args = _build_main_args(run_name, "eval", params)
+    print("[evaluate_phase] Running:", " ".join(args))
+    try:
+        subprocess.run(args, check=True)
+        # Upload eval artifacts (eval_results.npz, attribution_results.json) so the
+        # separate-process report_phase can reload them from the Volume.
+        _upload_run_artifacts(run_name, include_model_cache=False)
+        print(f"[evaluate_phase] Done for {run_name}.")
+    except Exception as _e:  # noqa: BLE001
+        _persist_error(run_name, "evaluate", _e)
+        raise
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=_PHASE_TIMEOUT,
+    cpu=_PHASE_CPU,
+    memory=_PHASE_MEM,
+    secrets=[modal.Secret.from_name("hf-token-secret")],
+)
+def report_phase(run_name: str, params: dict):
+    """REPORTING phase — CPU only (matplotlib figures + run_config.json update)."""
+    os.chdir("/app")
+    args = _build_main_args(run_name, "report", params)
+    print("[report_phase] Running:", " ".join(args))
+    try:
+        subprocess.run(args, check=True)
+        # Upload the run folder again so report figures + updated run_config.json
+        # are persisted to the Volume.
+        _upload_run_artifacts(run_name, include_model_cache=False)
+        print(f"[report_phase] Done for {run_name}.")
+    except Exception as _e:  # noqa: BLE001
+        _persist_error(run_name, "report", _e)
+        raise
+
+
+@app.function(
+    image=image,
+    volumes={"/data": volume},
+    timeout=_PHASE_TIMEOUT,
+    cpu=_PHASE_CPU,
+    memory=_PHASE_MEM,
+    secrets=[modal.Secret.from_name("hf-token-secret")],
+)
+def run_pipeline(run_name: str, params: dict):
+    """Orchestrate the full pipeline: GPU training, then CPU eval + report.
+
+    GPU is attached ONLY to the training phase (gpu="L4" in its decorator).
+    Evaluation and reporting run on CPU (no GPU requested).
+    """
+    # GPU is used ONLY inside train_phase (decorator has gpu="L4").
+    train_phase.remote(run_name, params)
+    evaluate_phase.remote(run_name, params)
+    report_phase.remote(run_name, params)
+    print(f"[run_pipeline] Pipeline complete for {run_name}.")
 
 
 @app.local_entrypoint()
@@ -265,42 +353,43 @@ def main(
     category_mode: str = "none",
     cat_embed_dim: int = 8,
     subcat_embed_dim: int = 8,
+    batch_size: int = 128,
+    eval_batch_size: int = 256,
 ):
     """Local entrypoint: configures secrets (from the slot) then launches the
-    remote GPU training function.
+    remote pipeline (GPU training + CPU eval/report).
 
     IMPORTANT — survive Ctrl+C / terminal close / laptop shutdown:
       Launch with `modal run --detach ...`. Two things make the run immune to
       closing the terminal or turning off your laptop:
         1. `--detach` keeps the Modal app alive on Modal's side after the client
            disconnects (nothing is stored on your laptop).
-        2. We use `train.spawn()` (NON-blocking) instead of `train.remote()`.
-           `train.remote()` holds the function's input stream; pressing Ctrl+C
-           forwards a cancellation signal on that stream and kills the run (this
-           is exactly the earlier failure). `spawn()` returns immediately and
-           holds no stream, so Ctrl+C only kills the local client — the spawned
-           function keeps running on Modal, and the detached app stays up until
-           training completes.
+        2. We use `run_pipeline.spawn()` (NON-blocking) instead of `.remote()`.
+           `.remote()` holds the function's input stream; pressing Ctrl+C forwards
+           a cancellation signal on that stream and kills the run. `spawn()`
+           returns immediately and holds no stream, so Ctrl+C only kills the local
+           client — the spawned pipeline keeps running on Modal, and the detached
+           app stays up until training completes.
+
+    GPU policy: only the training phase requests an L4 GPU (gpu="L4" in its
+    decorator). Evaluation and reporting run on CPU.
 
     Examples:
       modal run --detach run_nrms_mind.py --run-name exp01 --epochs 5 --train-mode listwise
       modal run --detach run_nrms_mind.py --run-name exp02 --epochs 5 --use-hf-embeddings
+      modal run --detach run_nrms_mind.py --run-name exp04 --epochs 5 --category-mode cross
 
     Monitor / retrieve later (from any machine):
       modal app list
       modal app logs <app-id>     # app-id is printed by `modal run --detach`
-      modal volume get nrms-mind-vol /data/checkpoints/<run_name> ./checkpoints/<run_name>
+      modal volume get nrms-mind-vol /checkpoints/<run_name> ./checkpoints/<run_name>
 
-    If training fails, the error is written to the Volume as
-    /train_error_<run_name>.txt (retrieve with `modal volume get ...`).
+    If a phase fails, its error is written to the Volume as
+    /<phase>_error_<run_name>.txt (retrieve with `modal volume get ...`).
     """
     setup_secrets()
-    # spawn() (non-blocking) launches training on Modal and returns immediately.
-    # There is no held input stream, so a Ctrl+C on the client does NOT cancel the
-    # run. Combined with `modal run --detach`, the app (and the spawned function)
-    # keeps running on Modal after the client/laptop exits.
-    handle = train.spawn(
-        run_name=run_name,
+    # Bundle all CLI args into a params dict forwarded to each phase function.
+    params = dict(
         use_hf_embeddings=use_hf_embeddings,
         embed_model=embed_model,
         epochs=epochs,
@@ -315,8 +404,16 @@ def main(
         category_mode=category_mode,
         cat_embed_dim=cat_embed_dim,
         subcat_embed_dim=subcat_embed_dim,
+        batch_size=batch_size,
+        eval_batch_size=eval_batch_size,
     )
-    print(f"[launch] Training spawned (handle={handle.object_id}). Run continues "
-          f"on Modal even if you press Ctrl+C / close the terminal / shut your "
-          f"laptop. Monitor with: modal app logs <app-id>")
+    # spawn() (non-blocking) launches the pipeline on Modal and returns immediately.
+    # There is no held input stream, so a Ctrl+C on the client does NOT cancel the
+    # run. Combined with `modal run --detach`, the app (and the spawned pipeline)
+    # keeps running on Modal after the client/laptop exits.
+    handle = run_pipeline.spawn(run_name, params)
+    print(f"[launch] Pipeline spawned (handle={handle.object_id}). Training uses "
+          f"GPU (L4); eval/report run on CPU. The run continues on Modal even if "
+          f"you press Ctrl+C / close the terminal / shut your laptop. Monitor "
+          f"with: modal app logs <app-id>")
 

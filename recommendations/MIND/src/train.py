@@ -280,7 +280,10 @@ def load_checkpoint(
     device: torch.device,
 ) -> Tuple[int, Dict[str, float]]:
     """Load a model checkpoint. Returns (epoch, metrics)."""
-    checkpoint = torch.load(path, map_location=device)
+    # weights_only=False: checkpoints are produced locally by save_checkpoint
+    # (trusted). PyTorch 2.6 defaults weights_only=True, which rejects numpy
+    # scalars stored in the metrics dict, so we opt out here.
+    checkpoint = torch.load(path, map_location=device, weights_only=False)
     model.load_state_dict(checkpoint["model_state_dict"])
     epoch = checkpoint.get("epoch", 0)
     metrics = checkpoint.get("metrics", {})
