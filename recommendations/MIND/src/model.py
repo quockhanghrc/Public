@@ -280,8 +280,20 @@ class CategoryAwareAttention(nn.Module):
         scores = torch.matmul(query, word_vecs.transpose(-2, -1)) / math.sqrt(word_vecs.size(-1))
         # (B, 1, seq_len)
         scores = scores.masked_fill(mask.unsqueeze(1) == 0, float("-inf"))
+        # Guard all-masked rows (e.g. empty title -> all -inf -> softmax NaN).
+        # Replace -inf with 0 so softmax yields a uniform-ish (finite) vector and
+        # the resulting context is a finite (zeroed) vector, matching the behavior
+        # of MultiHeadSelfAttention / AdditiveAttention.
+        all_masked = (mask.sum(dim=-1) == 0)  # (B,)
+        if all_masked.any():
+            # Boolean indexing returns a copy, so use masked_fill (expanded mask)
+            # to zero the scores of fully-padded titles -> finite uniform softmax.
+            scores = scores.masked_fill(all_masked.unsqueeze(1).unsqueeze(2), 0.0)
         attn = F.softmax(scores, dim=-1)
         cat_context = torch.matmul(attn, word_vecs).squeeze(1)  # (B, d_model)
+        # Zero out context for all-masked rows so they don't inject NaN/garbage.
+        if all_masked.any():
+            cat_context = cat_context * (~all_masked).unsqueeze(-1).float()
         return cat_context
 
 

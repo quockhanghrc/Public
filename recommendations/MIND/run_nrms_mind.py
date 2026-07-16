@@ -159,6 +159,9 @@ def train(
     use_amp: bool = False,
     freeze_embeddings: bool = False,
     bottleneck_dim: int = None,
+    category_mode: str = "none",
+    cat_embed_dim: int = 8,
+    subcat_embed_dim: int = 8,
     extra_args: list = None,
 ):
     """Run NRMS training inside the Modal container.
@@ -199,6 +202,10 @@ def train(
         args += ["--use_hf_embeddings", "--embed_model", embed_model]
         if freeze_embeddings:
             args += ["--freeze_embeddings"]
+    if category_mode != "none":
+        args += ["--category_mode", category_mode,
+                 "--cat_embed_dim", str(cat_embed_dim),
+                 "--subcat_embed_dim", str(subcat_embed_dim)]
     if extra_args:
         args += list(extra_args)
 
@@ -255,6 +262,9 @@ def main(
     use_amp: bool = False,
     freeze_embeddings: bool = False,
     bottleneck_dim: int = None,
+    category_mode: str = "none",
+    cat_embed_dim: int = 8,
+    subcat_embed_dim: int = 8,
 ):
     """Local entrypoint: configures secrets (from the slot) then launches the
     remote GPU training function.
@@ -302,6 +312,9 @@ def main(
         use_amp=use_amp,
         freeze_embeddings=freeze_embeddings,
         bottleneck_dim=bottleneck_dim,
+        category_mode=category_mode,
+        cat_embed_dim=cat_embed_dim,
+        subcat_embed_dim=subcat_embed_dim,
     )
     print(f"[launch] Training spawned (handle={handle.object_id}). Run continues "
           f"on Modal even if you press Ctrl+C / close the terminal / shut your "
