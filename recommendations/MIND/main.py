@@ -88,11 +88,25 @@ def parse_args():
                              "(NRMS/MIND protocol, K=4). None = keep all candidates "
                              "(no sampling, current default).")
     parser.add_argument("--train_mode", type=str, default="listwise",
-                        choices=["pointwise", "listwise"],
+                        choices=["pointwise", "listwise", "listwise_hn"],
                         help="pointwise = current (BCE, one candidate at a time); "
-                             "listwise = per-impression ranking loss (NRMS softmax-CE).")
+                             "listwise = per-impression ranking loss (NRMS softmax-CE); "
+                             "listwise_hn = listwise with HARD NEGATIVES mined by a "
+                             "Dense/MiniLM retriever (industry-aligned retraining).")
     parser.add_argument("--max_candidates", type=int, default=50,
                         help="Max candidates per impression (listwise mode; truncate/pad).")
+    parser.add_argument("--mine_num_hn", type=int, default=4,
+                        help="Hard negatives mined per impression when "
+                             "--train_mode listwise_hn (default 4, NRMS/MIND K).")
+    parser.add_argument("--mine_model", type=str,
+                        default="sentence-transformers/all-MiniLM-L6-v2",
+                        help="HuggingFace model used to mine hard negatives in "
+                             "listwise_hn mode (DenseRetriever).")
+    parser.add_argument("--mine_cache_dir", type=str, default="cache",
+                        help="Cache folder for the hard-negative mining model.")
+    parser.add_argument("--mine_max_news", type=int, default=None,
+                        help="Cap the hard-negative mining corpus size (smoke tests). "
+                             "None = use all news (full run).")
     parser.add_argument("--in_time_val_frac", type=float, default=0.0,
                         help="Fraction of train USERS held out as in-time validation "
                              "(user-disjoint from training). 0.0 = no in-time split "

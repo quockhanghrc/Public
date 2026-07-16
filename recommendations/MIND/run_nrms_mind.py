@@ -201,6 +201,13 @@ def _build_main_args(run_name: str, phase: str, params: dict) -> list:
         args += ["--category_mode", params["category_mode"],
                  "--cat_embed_dim", str(params.get("cat_embed_dim", 8)),
                  "--subcat_embed_dim", str(params.get("subcat_embed_dim", 8))]
+    if params.get("train_mode") == "listwise_hn":
+        args += ["--mine_num_hn", str(params.get("mine_num_hn", 4)),
+                 "--mine_model", params.get("mine_model",
+                                            "sentence-transformers/all-MiniLM-L6-v2"),
+                 "--mine_cache_dir", params.get("mine_cache_dir", "/data/model_cache")]
+        if params.get("mine_max_news") is not None:
+            args += ["--mine_max_news", str(params["mine_max_news"])]
     if params.get("batch_size") is not None:
         args += ["--batch_size", str(params["batch_size"])]
     if params.get("eval_batch_size") is not None:
@@ -355,6 +362,10 @@ def main(
     subcat_embed_dim: int = 8,
     batch_size: int = 128,
     eval_batch_size: int = 256,
+    mine_num_hn: int = 4,
+    mine_model: str = "sentence-transformers/all-MiniLM-L6-v2",
+    mine_cache_dir: str = "/data/model_cache",
+    mine_max_news: Optional[int] = None,
 ):
     """Local entrypoint: configures secrets (from the slot) then launches the
     remote pipeline (GPU training + CPU eval/report).
@@ -406,6 +417,10 @@ def main(
         subcat_embed_dim=subcat_embed_dim,
         batch_size=batch_size,
         eval_batch_size=eval_batch_size,
+        mine_num_hn=mine_num_hn,
+        mine_model=mine_model,
+        mine_cache_dir=mine_cache_dir,
+        mine_max_news=mine_max_news,
     )
     # spawn() (non-blocking) launches the pipeline on Modal and returns immediately.
     # There is no held input stream, so a Ctrl+C on the client does NOT cancel the

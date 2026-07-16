@@ -60,7 +60,7 @@ def train_one_epoch(
         if max_steps is not None and num_batches >= max_steps:
             break
 
-        if train_mode == "listwise":
+        if train_mode in ("listwise", "listwise_hn"):
             # batch = (history, candidates, labels, candidate_mask)
             history, candidates, labels, candidate_mask = batch
             history = history.to(device)

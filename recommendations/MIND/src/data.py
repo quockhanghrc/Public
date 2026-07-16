@@ -390,6 +390,91 @@ def build_impression_samples(
     return samples
 
 
+def build_impression_samples_hn(
+    behaviors_df: pd.DataFrame,
+    news_id_to_idx: Dict[str, int],
+    max_history_len: int = 30,
+    max_candidates: int = 50,
+    mined: Optional[List[Tuple[List[int], List[int], List[int]]]] = None,
+) -> List[Tuple[List[int], List[int], List[float]]]:
+    """
+    Build listwise training samples from PRE-MINED hard negatives.
+
+    Unlike build_impression_samples (which keeps MIND's random impression
+    negatives), this uses the negatives produced by mine_hard_negatives():
+    each impression's candidate set = its clicked positives + the mined hard
+    negatives. This is the industry-aligned "train the ranker on retrieved-but-
+    unclicked" protocol, so the retriever and reranker co-adapt.
+
+    Args:
+        behaviors_df: DataFrame with 'history' and 'impressions' columns.
+        news_id_to_idx: news_id (str) -> 1-based int index.
+        max_history_len: keep the most recent N history items.
+        max_candidates: cap on candidates per impression (pad/truncate).
+        mined: output of mine_hard_negatives() — list of
+            (history_indices, pos_idxs, hard_neg_idxs) per impression.
+
+    Returns:
+        List of (history_indices, candidate_idx_list, label_list) tuples,
+        ready for ImpressionMINDDataset + impression_collate_fn.
+    """
+    if mined is None:
+        raise ValueError("build_impression_samples_hn requires `mined` negatives.")
+
+    # Index mined entries by impression row position (they are produced in the
+    # same row order as behaviors_df, skipping only no-positive rows).
+    mined_by_row: Dict[int, Tuple[List[int], List[int], List[int]]] = {}
+    # mine_hard_negatives returns one tuple per processed impression in order;
+    # we re-derive the row index by walking behaviors_df the same way.
+    miter = iter(mined)
+    samples: List[Tuple[List[int], List[int], List[float]]] = []
+    missing_warned = False
+
+    for bidx in range(len(behaviors_df)):
+        row = behaviors_df.iloc[bidx]
+        history_raw = row.get("history", "")
+        if pd.notna(history_raw) and isinstance(history_raw, str) and history_raw.strip():
+            history_ids = history_raw.strip().split()
+        else:
+            history_ids = []
+        history_indices = []
+        for nid in history_ids:
+            if nid in news_id_to_idx:
+                history_indices.append(news_id_to_idx[nid])
+            elif not missing_warned:
+                warnings.warn(f"News ID {nid} not found in news data. Skipping.")
+                missing_warned = True
+        history_indices = history_indices[-max_history_len:]
+
+        impressions_raw = str(row["impressions"])
+        pos_idxs: List[int] = []
+        for item in impressions_raw.strip().split():
+            parts = item.rsplit("-", 1)
+            if len(parts) != 2:
+                continue
+            nid, label_str = parts
+            if nid not in news_id_to_idx:
+                continue
+            if label_str == "1":
+                pos_idxs.append(news_id_to_idx[nid])
+        if not pos_idxs:
+            continue  # mine_hard_negatives also skipped these; stay in sync
+
+        # Pull the matching mined tuple (same skip logic guarantees alignment).
+        try:
+            _, m_pos, m_neg = next(miter)
+        except StopIteration:
+            break
+        # Sanity: mined positives should match; if not, fall back to mined's own.
+        cand_idxs = list(m_pos) + list(m_neg)
+        label_list = [1.0] * len(m_pos) + [0.0] * len(m_neg)
+        if not cand_idxs:
+            continue
+        samples.append((history_indices, cand_idxs, label_list))
+
+    return samples
+
+
 def build_eval_impression_samples(
     behaviors_df: pd.DataFrame,
     news_id_to_idx: Dict[str, int],
@@ -473,6 +558,10 @@ def prepare_data(
     in_time_val_seed: int = 42,
     train_mode: str = "listwise",
     max_candidates: int = 50,
+    mine_num_hn: int = 4,
+    mine_model: str = "sentence-transformers/all-MiniLM-L6-v2",
+    mine_cache_dir: str = "cache",
+    mine_max_news: Optional[int] = None,
     seed: int = 42,
 ) -> Tuple:
     """
@@ -561,6 +650,8 @@ def prepare_data(
     # 4. Build training dataset (mode-dependent).
     #    pointwise: flatten to (history, candidate, label) triplets (current default).
     #    listwise: keep each impression grouped for per-impression ranking loss.
+    #    listwise_hn: listwise but with HARD NEGATIVES mined by a Dense retriever
+    #                 (industry-aligned: train ranker on retrieved-but-unclicked).
     if train_mode == "listwise":
         train_samples = build_impression_samples(
             train_behavior, news_id_to_idx, max_history_len,
@@ -568,6 +659,28 @@ def prepare_data(
         )
         train_dataset = ImpressionMINDDataset(train_samples)
         print(f"Training impressions (listwise): {len(train_samples)}")
+    elif train_mode == "listwise_hn":
+        from src.retrieval import DenseRetriever, mine_hard_negatives
+        # Cap the mining corpus for fast smoke tests (full run: mine_max_news=None).
+        mine_corpus = all_news
+        if mine_max_news is not None:
+            mine_corpus = all_news.head(mine_max_news).reset_index(drop=True)
+        print(f"\n[4b] Mining hard negatives with DenseRetriever (MiniLM) "
+              f"[corpus={len(mine_corpus)} news] ...")
+        miner = DenseRetriever(
+            model_name=mine_model, cache_dir=mine_cache_dir,
+        ).build_index(mine_corpus)
+        mined = mine_hard_negatives(
+            miner, train_behavior, news_id_to_idx,
+            max_history_len=max_history_len, num_hn=mine_num_hn,
+        )
+        train_samples = build_impression_samples_hn(
+            train_behavior, news_id_to_idx, max_history_len,
+            max_candidates=max_candidates, mined=mined,
+        )
+        train_dataset = ImpressionMINDDataset(train_samples)
+        print(f"Training impressions (listwise_hn, mined {mine_num_hn} neg/imp): "
+              f"{len(train_samples)}")
     else:  # pointwise (default, current behavior)
         train_samples = flatten_impressions(
             train_behavior, news_id_to_idx, max_history_len, neg_samples=neg_samples,

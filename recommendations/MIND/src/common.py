@@ -142,6 +142,10 @@ def prepare_run(args) -> RunState:
         in_time_val_seed=args.in_time_val_seed,
         train_mode=args.train_mode,
         max_candidates=args.max_candidates,
+        mine_num_hn=args.mine_num_hn,
+        mine_model=args.mine_model,
+        mine_cache_dir=args.mine_cache_dir,
+        mine_max_news=args.mine_max_news,
         seed=args.seed,
     )
 
@@ -149,7 +153,7 @@ def prepare_run(args) -> RunState:
         train_dataset,
         batch_size=args.batch_size,
         shuffle=True,
-        collate_fn=impression_collate_fn if args.train_mode == "listwise" else collate_fn,
+        collate_fn=impression_collate_fn if args.train_mode in ("listwise", "listwise_hn") else collate_fn,
         num_workers=args.num_workers,
     )
     in_time_val_loader = DataLoader(
