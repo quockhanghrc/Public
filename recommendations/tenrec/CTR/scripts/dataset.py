@@ -25,17 +25,19 @@ import json
 import numpy as np
 import pyarrow.parquet as pq
 import torch
-from torch.utils.data import DataLoader, IterableDataset
+from torch.utils.data import DataLoader, IterableDataset, get_worker_info
 
 import config
 
 
 class CtrIterableDataset(IterableDataset):
-    def __init__(self, split_dir: Path, stats: dict, shuffle_files: bool = False):
+    def __init__(self, split_dir: Path, stats: dict, shuffle_files: bool = False,
+                 epoch: int = 0):
         super().__init__()
         self.files = sorted(Path(split_dir).glob("ctr_part_*.parquet"))
         self.stats = stats
         self.shuffle_files = shuffle_files
+        self.epoch = epoch
         self.wt_mean = float(stats.get("watching_times_mean", 0.0))
         self.wt_std = float(stats.get("watching_times_std", 1.0)) or 1.0
 
@@ -44,8 +46,17 @@ class CtrIterableDataset(IterableDataset):
         if self.shuffle_files:
             # Local shuffle of file order; within-file order is preserved for
             # streaming. Good enough for SGD without loading everything.
-            rng = np.random.default_rng(config.SEED)
+            # Seed varies per epoch (config.SEED + epoch) so SGD sees a
+            # different file order each pass instead of the same sequence.
+            rng = np.random.default_rng(config.SEED + self.epoch)
             rng.shuffle(files)
+
+        # Split files across dataloader workers so each row is yielded exactly
+        # once per epoch. Without this, every worker replays the full dataset
+        # and each row is duplicated num_workers times.
+        wi = get_worker_info()
+        if wi is not None:
+            files = files[wi.id::wi.num_workers]
 
         for f in files:
             pf = pq.ParquetFile(f)
@@ -94,13 +105,15 @@ def load_stats():
         return json.load(f)
 
 
-def get_dataloader(split: str, stats: dict, shuffle_files: bool = False):
+def get_dataloader(split: str, stats: dict, shuffle_files: bool = False,
+                  epoch: int = 0):
     split_dir = config.SPLIT_DIR / split
     if not split_dir.exists():
         raise FileNotFoundError(
             f"Split dir {split_dir} not found. Run scripts/split_data.py first."
         )
-    ds = CtrIterableDataset(split_dir, stats, shuffle_files=shuffle_files)
+    ds = CtrIterableDataset(split_dir, stats, shuffle_files=shuffle_files,
+                            epoch=epoch)
     return DataLoader(
         ds,
         batch_size=None,  # IterableDataset already yields full batches

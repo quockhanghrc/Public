@@ -26,9 +26,9 @@ RUNS_DIR = REPO_ROOT / "runs"                         # one subdir per training 
 # ----------------------------------------------------------------------------
 # Split ratios (user-level hash). Defaults; overridable via CLI.
 # ----------------------------------------------------------------------------
-TRAIN_FRAC = 0.8
-VAL_FRAC = 0.1
-TEST_FRAC = 0.1  # remainder
+TRAIN_FRAC = 0.6
+VAL_FRAC = 0.2
+TEST_FRAC = 0.2  # remainder
 
 # ----------------------------------------------------------------------------
 # Feature / model dimensions
@@ -42,11 +42,24 @@ GENDER_CARD = 4            # values seen: {0,1,2}
 AGE_CARD = 10              # values seen: {0..7}
 
 EMBED_DIMS = {
-    "item_id": 64,          # shared with hist_1..hist_10
-    "video_category": 16,
+    "item_id": 64,          # shared with hist_1..hist_10 (hashed, see ITEM_HASH_*)
+    "video_category": 8,
     "gender": 4,
     "age": 8,
 }
+
+# Hashed item embedding (memory-bounded alternative to nn.Embedding(ITEM_CARD, dim)).
+# The full 3.9M-row table is replaced by a small hash table of ITEM_HASH_BUCKETS
+# rows; each item id is mapped through ITEM_NUM_HASHES independent hash functions
+# and the looked-up rows are combined (sum/concat). This bounds item-embedding
+# params to ITEM_HASH_BUCKETS * EMBED_DIMS["item_id"] regardless of ITEM_CARD.
+#   - sum   : output dim = EMBED_DIMS["item_id"] (collisions add, like a bag of
+#             embeddings; standard feature hashing).
+#   - concat: output dim = EMBED_DIMS["item_id"] * ITEM_NUM_HASHES (more capacity,
+#             more params; FINAL_DIM must be updated accordingly if used).
+ITEM_HASH_BUCKETS = 500_000
+ITEM_NUM_HASHES = 2
+ITEM_HASH_MODE = "sum"  # "sum" or "concat"
 
 # Engagement (follow/like/share) dense branch
 ENGAGEMENT_IN = 3
@@ -59,8 +72,13 @@ WATCH_OUT = 8
 HIST_LEN = 10
 ATTN_HEADS = 4
 ATTN_DROPOUT = 0.1
+# Raw item embedding (EMBED_DIMS["item_id"]=16) is projected up to this dim
+# BEFORE splitting into heads, then concatenated back to ATTN_PROJ_DIM.
+# Must be divisible by ATTN_HEADS.
+ATTN_PROJ_DIM = 64
 
-# Final concat width = 64 + 16 + 4 + 8 + 16 + 8 + 64 = 180
+# Final concat width = item_id(16) + video_category(8) + gender(4) + age(8)
+#   + engagement(16) + watch(8) + interest(ATTN_PROJ_DIM=64) = 124
 FINAL_DIM = (
     EMBED_DIMS["item_id"]
     + EMBED_DIMS["video_category"]
@@ -68,7 +86,7 @@ FINAL_DIM = (
     + EMBED_DIMS["age"]
     + ENGAGEMENT_OUT
     + WATCH_OUT
-    + EMBED_DIMS["item_id"]  # interest_vec from attention
+    + ATTN_PROJ_DIM  # interest_vec from projected attention
 )
 
 # MLP head
