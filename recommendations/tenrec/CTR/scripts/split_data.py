@@ -13,8 +13,12 @@ Outputs:
   data/split/train/ctr_part_*.parquet
   data/split/val/ctr_part_*.parquet
   data/split/test/ctr_part_*.parquet
-  data/split/stats.json   (watching_times mean/std, pos rate, split sizes,
-                          and the train/val/test frac ratios used)
+  data/split/stats.json   (pos rate, split sizes, and the train/val/test
+                          frac ratios used)
+
+  NOTE: follow / like / share / watching_times are DROPPED from the written
+  parquet (and from stats). They are post-click engagement signals, so using
+  them as features is target leakage.
 
 Idempotent: if data/split already exists and is non-empty, it is skipped unless
 --force is passed. With --force, any stale ctr_part_*.parquet files from a
@@ -28,7 +32,6 @@ import os
 import time
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 
@@ -118,9 +121,6 @@ def run_split(train_frac: float, val_frac: float, test_frac: float,
     split_counts = {s: 0 for s in ("train", "val", "test")}
 
     # Stats accumulators (streaming, numerically stable enough for our scale)
-    wt_sum = 0.0
-    wt_sumsq = 0.0
-    wt_n = 0
     pos_sum = 0
     total = 0
     seen_users = set()
@@ -143,11 +143,7 @@ def run_split(train_frac: float, val_frac: float, test_frac: float,
                 buffered_rows[split] += len(part)
                 split_counts[split] += len(part)
 
-                # stats
-                wt = part["watching_times"].to_numpy(dtype="float64")
-                wt_sum += wt.sum()
-                wt_sumsq += (wt ** 2).sum()
-                wt_n += wt.size
+                # stats (watching_times excluded: not a feature anymore)
                 pos_sum += int(part["click"].sum())
                 total += len(part)
                 seen_users.update(part["user_id"].unique().tolist())
@@ -160,11 +156,7 @@ def run_split(train_frac: float, val_frac: float, test_frac: float,
         if buffers[split]:
             _flush(config.SPLIT_DIR, split, buffers, file_index)
 
-    wt_mean = wt_sum / wt_n if wt_n else 0.0
-    wt_std = float(np.sqrt(max(wt_sumsq / wt_n - wt_mean ** 2, 1e-8))) if wt_n else 1.0
     stats = {
-        "watching_times_mean": float(wt_mean),
-        "watching_times_std": float(wt_std),
         "pos_rate": float(pos_sum / total) if total else 0.0,
         "n_rows": int(total),
         "n_users": int(len(seen_users)),
@@ -180,13 +172,17 @@ def run_split(train_frac: float, val_frac: float, test_frac: float,
     print(f"  rows: train={split_counts['train']:,} "
           f"val={split_counts['val']:,} test={split_counts['test']:,}")
     print(f"  users: {len(seen_users):,}  pos_rate={stats['pos_rate']:.4f}")
-    print(f"  watching_times mean={wt_mean:.4f} std={wt_std:.4f}")
     print(f"  stats -> {config.STATS_PATH}")
     return stats
 
 
 def _flush(split_dir: Path, split: str, buffers: dict, file_index: dict):
     out_df = pd.concat(buffers[split], ignore_index=True)
+    # Drop post-click engagement columns (target leakage): follow/like/share/
+    # watching_times. Keep everything else (incl. click = the label).
+    leak_cols = [c for c in ("follow", "like", "share", "watching_times") if c in out_df.columns]
+    if leak_cols:
+        out_df = out_df.drop(columns=leak_cols)
     out_path = split_dir / split / f"ctr_part_{file_index[split]:04d}.parquet"
     out_df.to_parquet(out_path, engine="pyarrow", index=False)
     print(f"  wrote {out_path}  ({len(out_df):,} rows)")

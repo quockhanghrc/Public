@@ -63,10 +63,16 @@ Useful flags:
   --eval-steps    cap validation batches per eval (default: None = same as --max-steps;
                   set a value >= steps/epoch for a full val pass)
   --test-steps    cap test batches (default: None = same as --eval-steps)
+  --eval-every    evaluate on val/test every N training steps (mid-epoch).
+                  None (default) = evaluate once per epoch.
+  --patience      early-stopping patience (evals without val_auc improvement,
+                  or epochs when --eval-every is unset). Default: config.ES_PATIENCE.
   --device        cpu or cuda (default: cpu)
   --train-frac / --val-frac / --test-frac  split fractions (defaults: 0.8/0.1/0.1)
   --auto-resplit  if requested frac ratios differ from the stored split, re-split
                   automatically instead of erroring out
+  --item-embed-method  item embedding: 'standard' (full nn.Embedding, ~62M params)
+                  or 'hash' (memory-bounded HashEmbedding, 64-dim rep)
 
 Outputs land in runs/{run_name}_{timestamp}/ (tensorboard/, metrics.json,
 plots/*.png, ctr_best.pt). Launch TensorBoard with:
@@ -279,28 +285,70 @@ def evaluate(model, dataloader, device, max_steps: int = None, desc: str = "eval
     return sm.compute()
 
 
-def train_one_epoch(model, dataloader, optimizer, criterion, device, max_steps: int = None):
+def train_one_epoch(model, dataloader, optimizer, criterion, device, max_steps: int = None,
+                    eval_every: int = None, on_eval=None, stop_check=None, base_step: int = 0):
+    # eval_every <= 0 means "disabled" -> evaluate only at end of epoch.
+    if eval_every is not None and eval_every <= 0:
+        eval_every = None
+    """Train for up to `max_steps` batches.
+
+    If `eval_every` is set, `on_eval(global_step, train_metrics)` is invoked after
+    every `eval_every` training steps (mid-epoch), letting the caller pause and run
+    validation without losing the dataloader iterator. `stop_check()` (if given) is
+    consulted after each eval; returning True aborts training early. `base_step`
+    offsets the step counter so the TensorBoard x-axis stays cumulative across epochs.
+    """
     model.train()
     sm = StreamingMetrics()
+    aux_weight = config.AUX_LOSS_WEIGHT
+    running_aux = 0.0
+    n_aux = 0
     pbar = tqdm(dataloader, desc="train", total=max_steps, leave=False)
+    step = 0
     for i, batch in enumerate(pbar):
         if max_steps is not None and i >= max_steps:
             break
         labels = batch["click"].to(device)
         feats = {k: v.to(device) for k, v in batch.items() if k != "click"}
-        logits = model(feats)  # (B,) raw logits
+        # return_aux=True is a no-op (returns just logits) when aux is disabled.
+        out = model(feats, return_aux=True)
+        logits = out[0] if isinstance(out, tuple) else out
         loss = criterion(logits, labels)
+        if isinstance(out, tuple) and len(out) > 1 and out[1] is not None:
+            aux = out[1]
+            loss = loss + aux_weight * aux
+            running_aux += float(aux.item())
+            n_aux += 1
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         sm.update(logits.detach().cpu().numpy(), labels.detach().cpu().numpy(),
                   float(loss.item()))
-        pbar.set_postfix(loss=f"{sm.compute()['loss']:.4f}")
-    return sm.compute()
+        step += 1
+        postfix = {"loss": f"{sm.compute()['loss']:.4f}"}
+        if n_aux:
+            postfix["aux"] = f"{running_aux / n_aux:.4f}"
+        pbar.set_postfix(**postfix)
+        if eval_every is not None and step % eval_every == 0:
+            if on_eval is not None:
+                on_eval(base_step + step, sm.compute())
+            model.train()  # evaluate() flipped us to eval mode; restore for training
+            # Reset windowed train metrics for the next check (matches Lightning,
+            # which resets train_sm at each on_validation_epoch_end).
+            sm = StreamingMetrics()
+            running_aux = 0.0
+            n_aux = 0
+            if stop_check is not None and stop_check():
+                break
+    result = sm.compute()
+    if n_aux:
+        result = dict(result)
+        result["aux_loss"] = running_aux / n_aux
+    return result, step
 
 
 def plot_metrics(metrics_history, run_dir: Path):
-    epochs = [m["epoch"] for m in metrics_history]
+    xvals = [m.get("step", m["epoch"]) for m in metrics_history]
     plots_dir = run_dir / "plots"
     plots_dir.mkdir(parents=True, exist_ok=True)
 
@@ -308,7 +356,7 @@ def plot_metrics(metrics_history, run_dir: Path):
         plt.figure(figsize=(8, 5))
         for split in ("train", "val", "test"):
             vals = [m[split][key] for m in metrics_history]
-            plt.plot(epochs, vals, marker="o", label=split)
+            plt.plot(xvals, vals, marker="o", label=split)
         plt.title(title)
         plt.xlabel("epoch")
         plt.ylabel(key)
@@ -380,18 +428,24 @@ def build_run_note(model, args, stats, metrics_history, best_val_auc, best_epoch
         "train_frac": stats.get("train_frac", args.train_frac),
         "val_frac": stats.get("val_frac", args.val_frac),
         "test_frac": stats.get("test_frac", args.test_frac),
+        "item_embed_method": args.item_embed_method,
+        "aux_loss_weight": args.aux_loss_weight,
         "pos_rate": pos_rate,
         "pos_weight": (1.0 - pos_rate) / max(pos_rate, 1e-6),
     }
 
     best_record = None
-    if best_epoch and 1 <= best_epoch <= len(metrics_history):
-        best_record = metrics_history[best_epoch - 1]
+    if metrics_history:
+        # Step-based eval means metrics_history is not 1:1 with epoch index,
+        # so pick the record with the highest val AUC directly.
+        best_record = max(metrics_history, key=lambda m: m["val"]["auc"])
 
     final_summary = {
-        "best_val_auc_epoch": best_epoch,
+        "best_val_auc_epoch": best_record["epoch"] if best_record else best_epoch,
         "best_val_auc": best_val_auc,
     }
+    if best_record and "step" in best_record:
+        final_summary["best_val_auc_step"] = best_record["step"]
     if best_record is not None:
         for split in ("train", "val", "test"):
             final_summary[split] = {
@@ -427,16 +481,38 @@ def main():
     p.add_argument("--max-steps", type=int, default=None,
                    help="Limit training batches per epoch (smoke test). None = full pass.")
     p.add_argument("--eval-steps", type=int, default=None,
-                   help="Limit validation batches per eval. None = same as --max-steps.")
+                   help="Cap validation batches per check. None = full val pass "
+                        "(matches Lightning's limit_val_batches=1.0).")
     p.add_argument("--test-steps", type=int, default=None,
-                   help="Limit test batches. None = same as --eval-steps.")
+                   help="Cap test batches per check. None = full test pass "
+                        "(or = --eval-steps when set).")
     p.add_argument("--auto-resplit", action="store_true",
                    help="If requested frac ratios differ from the stored split, "
                         "re-split automatically instead of erroring out.")
+    p.add_argument("--item-embed-method", choices=("standard", "hash", "qr"),
+                   default=config.ITEM_EMBED_METHOD,
+                   help="Item embedding: 'standard' = nn.Embedding(ITEM_CARD,16) "
+                        "(full table, ~62M params); 'hash' = memory-bounded "
+                        "HashEmbedding (ITEM_HASH_BUCKETS rows, 64-dim rep).")
+    p.add_argument("--aux-loss-weight", type=float, default=config.AUX_LOSS_WEIGHT,
+                   help="DIEN-style next-item auxiliary loss weight. 0 = disabled "
+                        "(default; zero overhead, bit-identical to prior runs). "
+                        ">0 blends the aux loss into the total training loss.")
+    p.add_argument("--eval-every", type=int, default=2000,
+                   help="Validation check every N training steps (mid-epoch), "
+                        "matching Lightning's val_check_interval. Default 2000. "
+                        "Set to 0 to evaluate only once per epoch.")
+    p.add_argument("--patience", type=int, default=5,
+                   help="Early-stopping patience: consecutive non-improving val_auc "
+                        "checks (or epochs when --eval-every is unset). "
+                        "Default: 5 (matches train_lightning.py).")
     args = p.parse_args()
 
     config.BATCH_SIZE = args.batch_size
     config.NUM_WORKERS = args.num_workers
+    # Must be set BEFORE build_model: the aux GRU encoder is only constructed
+    # when AUX_LOSS_WEIGHT > 0, so this gates the extra params/compute.
+    config.AUX_LOSS_WEIGHT = args.aux_loss_weight
 
     # Run directory: runs/{name}_{unix_ts}
     ts = int(time.time())
@@ -465,10 +541,13 @@ def main():
         print(f"  full pass per epoch ({args.epochs} epochs) -> "
               f"{cov['total_steps']:,} total steps")
 
-    # Eval / test step caps are separate from training so you can evaluate
-    # on more (or less) data than you trained on.
-    eval_steps = args.eval_steps if args.eval_steps is not None else args.max_steps
-    test_steps = args.test_steps if args.test_steps is not None else eval_steps
+    # None = full pass (matches Lightning's limit_val_batches=1.0 / full test).
+    eval_steps = args.eval_steps
+    test_steps = args.test_steps if args.test_steps is not None else args.eval_steps
+    # Continuous (--max-steps) but no --eval-every: evaluate once at the end of
+    # the capped training so the run still emits metrics + a best checkpoint.
+    if args.eval_every is None and args.max_steps is not None:
+        args.eval_every = args.max_steps
     split_counts = stats.get("split_counts") or {}
     n_val = int(split_counts.get("val", 0))
     n_test = int(split_counts.get("test", 0))
@@ -479,7 +558,7 @@ def main():
     # ---------------------------------------------------------------------
 
     device = args.device
-    model = build_model(device)
+    model = build_model(device, item_embed_method=args.item_embed_method)
     n_params = sum(pp.numel() for pp in model.parameters())
     print(f"Model params: {n_params:,}")
     param_summary = summarize_model_params(model)
@@ -492,7 +571,7 @@ def main():
         model.parameters(), lr=args.lr, weight_decay=args.weight_decay
     )
     writer = SummaryWriter(log_dir=str(run_dir / "tensorboard"))
-    early_stop = EarlyStopping(patience=config.ES_PATIENCE, monitor=config.ES_MONITOR)
+    early_stop = EarlyStopping(patience=args.patience, monitor=config.ES_MONITOR)
 
     val_dl = get_dataloader("val", stats)
     test_dl = get_dataloader("test", stats)
@@ -500,53 +579,124 @@ def main():
     metrics_history = []
     best_val_auc = -np.inf
     best_state = None
+    global_step = 0
+    check_idx = 0
+    stop_training = False
 
     for epoch in range(1, args.epochs + 1):
         t0 = time.time()
+        # --max-steps is a GLOBAL budget (matches Lightning's max_steps), not a
+        # per-epoch cap. Cap this epoch at whatever budget remains; once the
+        # global budget is exhausted, stop training (no new epoch).
+        if args.max_steps is not None:
+            if global_step >= args.max_steps:
+                break
+            epoch_max_steps = args.max_steps - global_step
+        else:
+            epoch_max_steps = None
         # Rebuild the train loader each epoch so the file-order shuffle seed
         # varies (config.SEED + epoch) -> different SGD order per pass.
         train_dl = get_dataloader("train", stats, shuffle_files=True, epoch=epoch)
-        train_m = train_one_epoch(model, train_dl, optimizer, criterion, device, args.max_steps)
-        val_m = evaluate(model, val_dl, device, eval_steps)
-        test_m = evaluate(model, test_dl, device, test_steps)
-        dt = time.time() - t0
 
-        record = {
-            "epoch": epoch,
-            "train": train_m,
-            "val": val_m,
-            "test": test_m,
-            "lr": args.lr,
-            "seconds": round(dt, 1),
-        }
-        metrics_history.append(record)
+        def on_eval(gstep, train_m):
+            nonlocal best_val_auc, best_state, stop_training, check_idx
+            check_idx += 1
+            val_m = evaluate(model, val_dl, device, eval_steps)
+            test_m = evaluate(model, test_dl, device, test_steps)
+            record = {
+                "epoch": check_idx,
+                "step": gstep,
+                "train": train_m,
+                "val": val_m,
+                "test": test_m,
+                "lr": args.lr,
+                "seconds": round(time.time() - t0, 1),
+            }
+            metrics_history.append(record)
 
-        # TensorBoard
-        writer.add_scalar("AUC/train", train_m["auc"], epoch)
-        writer.add_scalar("AUC/val", val_m["auc"], epoch)
-        writer.add_scalar("AUC/test", test_m["auc"], epoch)
-        writer.add_scalar("PR-AUC/train", train_m["prauc"], epoch)
-        writer.add_scalar("PR-AUC/val", val_m["prauc"], epoch)
-        writer.add_scalar("PR-AUC/test", test_m["prauc"], epoch)
-        writer.add_scalar("Loss/train", train_m["loss"], epoch)
-        writer.add_scalar("Loss/val", val_m["loss"], epoch)
-        writer.add_scalar("Loss/test", test_m["loss"], epoch)
+            # TensorBoard (global_step = cumulative training steps)
+            writer.add_scalar("AUC/train", train_m["auc"], gstep)
+            writer.add_scalar("AUC/val", val_m["auc"], gstep)
+            writer.add_scalar("AUC/test", test_m["auc"], gstep)
+            writer.add_scalar("PR-AUC/train", train_m["prauc"], gstep)
+            writer.add_scalar("PR-AUC/val", val_m["prauc"], gstep)
+            writer.add_scalar("PR-AUC/test", test_m["prauc"], gstep)
+            writer.add_scalar("Loss/train", train_m["loss"], gstep)
+            writer.add_scalar("Loss/val", val_m["loss"], gstep)
+            writer.add_scalar("Loss/test", test_m["loss"], gstep)
+            if "aux_loss" in train_m:
+                writer.add_scalar("AuxLoss/train", train_m["aux_loss"], gstep)
 
-        print(f"Epoch {epoch:02d} [{dt:5.1f}s] "
-              f"train(auc={train_m['auc']:.4f},loss={train_m['loss']:.4f}) "
-              f"val(auc={val_m['auc']:.4f},prauc={val_m['prauc']:.4f}) "
-              f"test(auc={test_m['auc']:.4f},prauc={test_m['prauc']:.4f})")
+            print(f"Check {check_idx:02d} "
+                  f"train(auc={train_m['auc']:.4f},loss={train_m['loss']:.4f}) "
+                  f"val(auc={val_m['auc']:.4f},prauc={val_m['prauc']:.4f}) "
+                  f"test(auc={test_m['auc']:.4f},prauc={test_m['prauc']:.4f})")
 
-        if val_m["auc"] > best_val_auc:
-            best_val_auc = val_m["auc"]
-            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
-            torch.save(best_state, run_dir / "ctr_best.pt")
-            print(f"  -> saved best checkpoint (val_auc={best_val_auc:.4f})")
+            if val_m["auc"] > best_val_auc:
+                best_val_auc = val_m["auc"]
+                best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+                torch.save(best_state, run_dir / "ctr_best.pt")
+                print(f"    -> saved best checkpoint (val_auc={best_val_auc:.4f})")
 
-        if early_stop.step({"epoch": epoch, "val_auc": val_m["auc"]}):
-            print(f"Early stopping at epoch {epoch} (no val_auc improvement "
-                  f"for {config.ES_PATIENCE} epochs).")
+            if early_stop.step({"epoch": epoch, "val_auc": val_m["auc"]}):
+                print(f"Early stopping at step {gstep} (no val_auc improvement "
+                      f"for {args.patience} evals).")
+                stop_training = True
+
+        train_m, steps_done = train_one_epoch(
+            model, train_dl, optimizer, criterion, device, epoch_max_steps,
+            eval_every=args.eval_every, on_eval=on_eval,
+            stop_check=(lambda: stop_training), base_step=global_step,
+        )
+        # Advance the global step counter by however many steps we actually
+        # trained (not the full cap, which may exceed the remaining budget).
+        global_step += steps_done
+
+        if stop_training:
             break
+
+        # End-of-epoch eval only when periodic (mid-epoch) eval is disabled.
+        if args.eval_every is None or args.eval_every <= 0:
+            val_m = evaluate(model, val_dl, device, eval_steps)
+            test_m = evaluate(model, test_dl, device, test_steps)
+            dt = time.time() - t0
+            record = {
+                "epoch": epoch,
+                "train": train_m,
+                "val": val_m,
+                "test": test_m,
+                "lr": args.lr,
+                "seconds": round(dt, 1),
+            }
+            metrics_history.append(record)
+
+            writer.add_scalar("AUC/train", train_m["auc"], epoch)
+            writer.add_scalar("AUC/val", val_m["auc"], epoch)
+            writer.add_scalar("AUC/test", test_m["auc"], epoch)
+            writer.add_scalar("PR-AUC/train", train_m["prauc"], epoch)
+            writer.add_scalar("PR-AUC/val", val_m["prauc"], epoch)
+            writer.add_scalar("PR-AUC/test", test_m["prauc"], epoch)
+            writer.add_scalar("Loss/train", train_m["loss"], epoch)
+            writer.add_scalar("Loss/val", val_m["loss"], epoch)
+            writer.add_scalar("Loss/test", test_m["loss"], epoch)
+            if "aux_loss" in train_m:
+                writer.add_scalar("AuxLoss/train", train_m["aux_loss"], epoch)
+
+            print(f"Epoch {epoch:02d} [{dt:5.1f}s] "
+                  f"train(auc={train_m['auc']:.4f},loss={train_m['loss']:.4f}) "
+                  f"val(auc={val_m['auc']:.4f},prauc={val_m['prauc']:.4f}) "
+                  f"test(auc={test_m['auc']:.4f},prauc={test_m['prauc']:.4f})")
+
+            if val_m["auc"] > best_val_auc:
+                best_val_auc = val_m["auc"]
+                best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+                torch.save(best_state, run_dir / "ctr_best.pt")
+                print(f"  -> saved best checkpoint (val_auc={best_val_auc:.4f})")
+
+            if early_stop.step({"epoch": epoch, "val_auc": val_m["auc"]}):
+                print(f"Early stopping at epoch {epoch} (no val_auc improvement "
+                      f"for {args.patience} epochs).")
+                break
 
     # Finalize
     with open(run_dir / "metrics.json", "w") as f:

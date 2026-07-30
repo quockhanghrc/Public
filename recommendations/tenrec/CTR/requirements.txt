@@ -1,0 +1,7 @@
+# PyTorch Lightning (new package name; `pytorch-lightning` is the deprecated alias).
+# Install in the Anaconda env used for this project:
+#   d:\Anaconda\python.exe -m pip install -r requirements.txt
+lightning
+
+# Core dependencies (already present in the Anaconda env for this project):
+#   torch, pyarrow, numpy, pandas, matplotlib, tqdm, tensorboard

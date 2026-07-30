@@ -3,7 +3,7 @@
 Two entry points:
 - **Local** (`main.py`): runs on your machine (CPU or CUDA). Flags use **underscores**
   (`--use_hf_embeddings`, `--bottleneck_dim`).
-- **Modal GPU** (`run_nrms_mind.py`): runs on Modal's T4. Flags use **hyphens**
+- **Modal GPU** (`run_nrms_mind.py`): runs on Modal's L4 GPU. Flags use **hyphens**
   (`--use-hf-embeddings`, `--bottleneck-dim`) because Modal's CLI auto-converts
   underscores to hyphens. The script forwards them to the same `main.py` inside the
   container, so behavior is identical.
@@ -62,12 +62,24 @@ python main.py --epochs 3 --use_hf_embeddings --bottleneck_dim 64 --freeze_embed
 python main.py --epochs 3 --use_hf_embeddings --bottleneck_dim 64 --train_mode listwise
 ```
 
+### A10. Hard-negative retraining (`listwise_hn`) — local smoke
+Mines hard negatives with the Dense/MiniLM retriever, then trains on
+`[positives + mined hard negatives]`. `--mine_max_news` caps the mining corpus
+for fast local smoke tests (omit for the full ~65k corpus).
+```bash
+python main.py --epochs 1 --use_hf_embeddings --bottleneck_dim 64 --train_mode listwise_hn \
+  --mine_num_hn 4 --mine_max_news 2000 --max_train_impressions 200 --max_dev_impressions 100
+```
+
 ---
 
 ## B. Modal GPU (`run_nrms_mind.py`)
 
-> Use `--detach` is NOT needed: the script already uses `train.spawn()` so the run
-> survives your terminal closing / laptop powering off. Monitor with
+> `--detach` is OPTIONAL. The entrypoint uses `train_phase.spawn()` (non-blocking),
+> so the run already survives your terminal closing / laptop powering off even
+> without `--detach`. Adding `--detach` (i.e. `modal run --detach run_nrms_mind.py …`)
+> additionally keeps the Modal *app* alive on Modal's side after the client
+> disconnects, which is recommended for long GPU jobs. Monitor with
 > `modal app logs <app-id>` (printed at launch) or `modal app list`.
 
 ### B1. Baseline — random embeddings, no bottleneck (quick GPU smoke)
@@ -100,6 +112,23 @@ modal run run_nrms_mind.py --run-name exp_full --epochs 20 --use-hf-embeddings -
 ```bash
 modal run run_nrms_mind.py --run-name t_frozen --epochs 3 --use-hf-embeddings --bottleneck-dim 64 --freeze-embeddings
 ```
+
+### B7. Hard-negative retraining (`listwise_hn`) — industry-aligned two-stage
+Mines hard negatives with the Dense/MiniLM retriever, then trains NRMS on
+`[positives + mined hard negatives]` with the listwise loss. Most aligned with
+production retrieval→rerank. See `03_hard_negative_retrain.ipynb`.
+```bash
+# Smoke test on Modal (small mining corpus + few impressions)
+modal run run_nrms_mind.py --run-name t_hn_smoke --epochs 1 --train-mode listwise_hn \
+  --max-train-impressions 200 --max-dev-impressions 100 --mine-num-hn 4 --mine-max-news 2000
+
+# Full run (mine over the full ~65k corpus; GPU)
+modal run run_nrms_mind.py --run-name exp_hn --epochs 5 --train-mode listwise_hn \
+  --mine-num-hn 4 --use-hf-embeddings --bottleneck-dim 64
+```
+> `--mine-max-news` caps the mining corpus (smoke tests). Omit it for the full run.
+> `--mine-num-hn` = hard negatives mined per impression (default 4 = NRMS/MIND K).
+> `--mine-model` / `--mine-cache-dir` default to MiniLM and `/data/model_cache`.
 
 ---
 

@@ -19,6 +19,9 @@ recommendations/MIND/cache/
 00_utils/
 /artifacts/*
 artifacts/
+runs/
+data/
+ref/
 movie_lens/data/*
 # Build and package output
 build/

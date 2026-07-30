@@ -38,6 +38,7 @@ Usage:
 import io
 import os
 import subprocess
+from typing import Optional
 
 import modal
 
@@ -131,12 +132,19 @@ def setup_secrets():
     """
     if MODAL_TOKEN_ID and MODAL_TOKEN_SECRET:
         print("[secrets] Setting Modal token (local auth)...")
-        subprocess.run(
-            ["modal", "token", "set",
-             "--token-id", MODAL_TOKEN_ID,
-             "--token-secret", MODAL_TOKEN_SECRET],
-            check=False,
-        )
+        # Capture output instead of streaming it. Modal's CLI prints a '✓'
+        # (U+2713) on success, which the Windows console codec (cp1252) cannot
+        # encode -> would raise "charmap codec can't encode" and abort the
+        # local entrypoint before the app launches. Capturing avoids that.
+        try:
+            subprocess.run(
+                ["modal", "token", "set",
+                 "--token-id", MODAL_TOKEN_ID,
+                 "--token-secret", MODAL_TOKEN_SECRET],
+                check=False, capture_output=True, text=True,
+            )
+        except Exception as _se:  # noqa: BLE001
+            print(f"[secrets] modal token set failed: {_se}")
     else:
         print("[secrets] MODAL_TOKEN_* not set — skipping Modal auth "
               "(ensure `modal token set` was run manually if deploy fails).")
@@ -171,7 +179,21 @@ def _warn_missing_data():
 
 
 def _build_main_args(run_name: str, phase: str, params: dict) -> list:
-    """Build the `python main.py --phase <phase> ...` argv list from params."""
+    """Build the `python main.py --phase <phase> ...` argv list from params.
+
+    RETRIEVAL / HARD-NEGATIVE MINING DELEGATION
+    -------------------------------------------
+    This launcher does NOT implement retrieval itself. When `train_mode ==
+    "listwise_hn"`, we forward the mining flags (`--mine_num_hn`, `--mine_model`,
+    `--mine_cache_dir`, `--mine_max_news`) to `main.py`. `main.py`'s train phase
+    then performs the retrieval internally inside `prepare_data()`:
+        DenseRetriever.build_index()  -> builds the dense (MiniLM) ANN index
+        mine_hard_negatives()         -> mines hard negatives per impression
+        build_impression_samples_hn() -> assembles [positives + mined] samples
+    So `run_nrms_mind.py` "does what main.py does" for retrieval by delegating to
+    the same code path (src/retrieval.py via src/data.py), not by re-implementing
+    it. This keeps the launcher and main.py in lockstep (no divergence).
+    """
     args = [
         "python", "-u", "main.py",
         "--phase", phase,
@@ -258,7 +280,12 @@ def _persist_error(run_name: str, phase: str, exc: Exception):
     secrets=[modal.Secret.from_name("hf-token-secret")],
 )
 def train_phase(run_name: str, params: dict):
-    """TRAINING phase — the ONLY phase that needs a GPU (gpu="L4" in decorator)."""
+    """TRAINING phase — the ONLY phase that needs a GPU (gpu="L4" in decorator).
+
+    When `params["train_mode"] == "listwise_hn"`, the forwarded `main.py` call
+    performs hard-negative mining (retrieval) as part of its data preparation
+    before training — i.e. this phase is also where retrieval happens.
+    """
     os.chdir("/app")
     _warn_missing_data()
     args = _build_main_args(run_name, "train", params)

@@ -10,13 +10,13 @@ Feature dict produced per batch:
   video_category : (B,)        int64   nullable -> filled with 0
   gender         : (B,)        int64
   age            : (B,)        int64
-  follow         : (B,)        float32
-  like           : (B,)        float32
-  share          : (B,)        float32
-  watching_times : (B,)        float32 (z-scored via stats.json)
   hist           : (B, HIST_LEN) int64  history items, 0 = padding
   hist_mask      : (B, HIST_LEN) bool   True where hist != 0
   click          : (B,)        float32  target
+
+  NOTE: follow / like / share / watching_times are intentionally NOT yielded.
+  They are post-click engagement signals (only observable AFTER the user
+  clicks), so using them as features is target leakage.
 """
 
 from pathlib import Path
@@ -40,6 +40,8 @@ class CtrIterableDataset(IterableDataset):
         self.epoch = epoch
         self.wt_mean = float(stats.get("watching_times_mean", 0.0))
         self.wt_std = float(stats.get("watching_times_std", 1.0)) or 1.0
+        # watching_times is no longer a feature (target leakage), but we keep
+        # reading stats harmlessly; it is simply not yielded.
 
     def __iter__(self):
         files = list(self.files)
@@ -70,13 +72,7 @@ class CtrIterableDataset(IterableDataset):
         gender = df["gender"].to_numpy(dtype="int64")
         age = df["age"].to_numpy(dtype="int64")
 
-        follow = df["follow"].fillna(0).to_numpy(dtype="float32")
-        like = df["like"].fillna(0).to_numpy(dtype="float32")
-        share = df["share"].fillna(0).to_numpy(dtype="float32")
-
-        wt = df["watching_times"].to_numpy(dtype="float32")
-        wt = (wt - self.wt_mean) / self.wt_std
-
+        # follow / like / share / watching_times are NOT used (target leakage).
         hist = np.stack(
             [df[f"hist_{i}"].fillna(0).to_numpy(dtype="int64") for i in range(1, config.HIST_LEN + 1)],
             axis=1,
@@ -90,10 +86,6 @@ class CtrIterableDataset(IterableDataset):
             "video_category": torch.as_tensor(video_category),
             "gender": torch.as_tensor(gender),
             "age": torch.as_tensor(age),
-            "follow": torch.as_tensor(follow),
-            "like": torch.as_tensor(like),
-            "share": torch.as_tensor(share),
-            "watching_times": torch.as_tensor(wt),
             "hist": torch.as_tensor(hist),
             "hist_mask": torch.as_tensor(hist_mask),
             "click": torch.as_tensor(click),
@@ -106,7 +98,7 @@ def load_stats():
 
 
 def get_dataloader(split: str, stats: dict, shuffle_files: bool = False,
-                  epoch: int = 0):
+                  epoch: int = 0, pin_memory: bool = None):
     split_dir = config.SPLIT_DIR / split
     if not split_dir.exists():
         raise FileNotFoundError(
@@ -114,11 +106,15 @@ def get_dataloader(split: str, stats: dict, shuffle_files: bool = False,
         )
     ds = CtrIterableDataset(split_dir, stats, shuffle_files=shuffle_files,
                             epoch=epoch)
+    # pin_memory only helps CUDA transfers; on CPU it adds a needless copy AND
+    # emits a PyTorch warning. Default it to "only when CUDA is available".
+    if pin_memory is None:
+        pin_memory = torch.cuda.is_available()
     return DataLoader(
         ds,
         batch_size=None,  # IterableDataset already yields full batches
         num_workers=config.NUM_WORKERS,
-        pin_memory=True,
+        pin_memory=pin_memory,
         drop_last=False,
     )
 

@@ -6,10 +6,12 @@ Architecture (matches the agreed design):
   video_category -> Embedding(16)
   gender         -> Embedding(4)
   age            -> Embedding(8)
-  follow/like/share -> concat -> Linear -> 16d   (engagement vector)
-  watching_times -> z-scored -> Linear -> 8d     (watch vector)
   hist_1..hist_10   -> SHARED item embed -> Attention(query=item_embed) -> 64d
-  concat(180) -> LayerNorm -> MLP[256,128,64] (Dice + BN + Dropout) -> Linear(1) -> Sigmoid
+  concat -> LayerNorm -> MLP[256,128,64] (Dice + BN + Dropout) -> Linear(1) -> Sigmoid
+
+  NOTE: follow / like / share / watching_times were REMOVED as inputs. They are
+  post-click engagement signals (only observable AFTER the user clicks), so
+  using them as features is target leakage.
 
 Embedding-model notes:
   * ONE shared nn.Embedding for item_id and all hist_* halves parameters and
@@ -244,14 +246,101 @@ class HashEmbedding(nn.Module):
         return emb.reshape(*orig_shape, emb.shape[-1])
 
 
-class CTRModel(nn.Module):
-    def __init__(self):
-        super().__init__()
+class QREmbedding(nn.Module):
+    """Quotient-Remainder (QR) Embedding for high-cardinality IDs.
 
-        # Shared item embedding (candidate + history). padding_idx=0.
-        self.item_emb = nn.Embedding(
-            config.ITEM_CARD, config.EMBED_DIMS["item_id"], padding_idx=0
-        )
+    Maps an ID to a unique combination of (quotient, remainder) embeddings.
+    For ITEM_CARD = 3,865,000, divisor = int(sqrt(vocab_size)) = 1965, so the
+    two tables are ~1967 x split_dim and 1965 x split_dim each. Because
+    id = q * divisor + r is a bijection, every id gets a DISTINCT vector with
+    ZERO collisions, while the parameter count stays tiny
+    ((q_size + r_size) * split_dim) instead of vocab_size * dim.
+
+    padding_idx=0 in both tables means id==0 (padding) maps to (0,0) and returns
+    a zero vector with no gradient, matching the masking strategy used by the
+    shared item embedding (masked history never pollutes gradients).
+    """
+
+    def __init__(self, vocab_size: int, embedding_dim: int, padding_idx: int = 0):
+        super().__init__()
+        assert embedding_dim % 2 == 0, "embedding_dim must be even for symmetric split"
+        self.split_dim = embedding_dim // 2
+
+        # divisor is set to sqrt(vocab_size) to keep both tables balanced
+        self.divisor = int(vocab_size ** 0.5)
+
+        self.q_size = (vocab_size // self.divisor) + 1
+        self.r_size = self.divisor
+
+        # Tables with padding_idx=0 to match the masking strategy
+        self.q_table = nn.Embedding(self.q_size, self.split_dim, padding_idx=padding_idx)
+        self.r_table = nn.Embedding(self.r_size, self.split_dim, padding_idx=padding_idx)
+
+    def forward(self, ids: torch.Tensor) -> torch.Tensor:
+        # Avoid division issues on negative numbers if any exist
+        ids_clean = torch.clamp(ids, min=0)
+
+        q = torch.div(ids_clean, self.divisor, rounding_mode='trunc')
+        r = torch.remainder(ids_clean, self.divisor)
+
+        # When ids is 0 (padding), both q and r will be 0, returning a zero vector
+        q_emb = self.q_table(q)
+        r_emb = self.r_table(r)
+
+        # Concatenate quotient and remainder embeddings -> (..., embedding_dim)
+        return torch.cat([q_emb, r_emb], dim=-1)
+
+
+class CTRModel(nn.Module):
+    def __init__(self, item_embed_method: str = config.ITEM_EMBED_METHOD):
+        super().__init__()
+        assert item_embed_method in ("standard", "hash", "qr"), \
+            "item_embed_method must be 'standard', 'hash', or 'qr'"
+
+        # Shared item embedding (candidate + history). Three implementations:
+        #   standard: nn.Embedding(ITEM_CARD, 16, padding_idx=0)  -> 16-dim rep
+        #   hash:     HashEmbedding(...) -> ITEM_HASH_EMBED_DIM (64) rep, bounded
+        #             memory regardless of ITEM_CARD (collisions on rare items).
+        #   qr:       QREmbedding(...) -> ITEM_QR_EMBED_DIM (64) rep, ZERO
+        #             collisions (bijection id = q*divisor + r), tiny memory.
+        # The attention head's raw_dim follows the chosen item rep width.
+        if item_embed_method == "hash":
+            self.item_emb = HashEmbedding(
+                vocab_size=config.ITEM_CARD,
+                embedding_dim=config.ITEM_HASH_EMBED_DIM,
+                hash_buckets=config.ITEM_HASH_BUCKETS,
+                num_hashes=config.ITEM_NUM_HASHES,
+                mode=config.ITEM_HASH_MODE,
+            )
+            self.item_emb_dim = config.ITEM_HASH_EMBED_DIM
+        elif item_embed_method == "qr":
+            self.item_emb = QREmbedding(
+                vocab_size=config.ITEM_CARD,
+                embedding_dim=config.ITEM_QR_EMBED_DIM,
+                padding_idx=0,
+            )
+            self.item_emb_dim = config.ITEM_QR_EMBED_DIM
+        else:
+            self.item_emb = nn.Embedding(
+                config.ITEM_CARD, config.EMBED_DIMS["item_id"], padding_idx=0
+            )
+            self.item_emb_dim = config.EMBED_DIMS["item_id"]
+        self.item_embed_method = item_embed_method
+
+        # Auxiliary (DIEN-style) next-item loss. Only built when enabled so the
+        # param count / compute stays identical to current runs when weight == 0.
+        # The GRU reads the shared item embedding of the history and, at each step
+        # t, predicts the NEXT history item (supervising the shared item_emb).
+        self.aux_encoder = None
+        self.aux_proj = None
+        if config.AUX_LOSS_WEIGHT > 0:
+            self.aux_encoder = nn.GRU(
+                self.item_emb_dim, config.AUX_HIDDEN, batch_first=True
+            )
+            # Project GRU hidden (AUX_HIDDEN) back to item_emb_dim so it can be
+            # scored against item embeddings via dot product (dims must match).
+            self.aux_proj = nn.Linear(config.AUX_HIDDEN, self.item_emb_dim)
+
         self.cat_emb = nn.Embedding(
             config.VIDEO_CATEGORY_CARD, config.EMBED_DIMS["video_category"], padding_idx=0
         )
@@ -262,29 +351,31 @@ class CTRModel(nn.Module):
             config.AGE_CARD, config.EMBED_DIMS["age"], padding_idx=0
         )
 
-        # Engagement dense branch
-        self.engagement = nn.Sequential(
-            nn.Linear(config.ENGAGEMENT_IN, config.ENGAGEMENT_OUT),
-            Dice(config.ENGAGEMENT_OUT),
-        )
-        # Watch dense branch
-        self.watch = nn.Sequential(
-            nn.Linear(1, config.WATCH_OUT),
-            Dice(config.WATCH_OUT),
-        )
-
-        # History attention (projected multi-head)
+        # History attention (projected multi-head). raw_dim = item rep width.
         self.history_attn = MultiHeadProjectedAttention(
-            raw_dim=config.EMBED_DIMS["item_id"],
+            raw_dim=self.item_emb_dim,
             proj_dim=config.ATTN_PROJ_DIM,
             num_heads=config.ATTN_HEADS,
             dropout=config.ATTN_DROPOUT,
         )
 
+        # Final concat width depends on the chosen item-embedding method
+        # (standard=16-dim, hash=64-dim). Compute it from the actual item dim
+        # so LayerNorm/MLP match the runtime selection, not config.FINAL_DIM
+        # (which is fixed at import time from the default method).
+        # follow/like/share/watching_times removed (target leakage).
+        fused_dim = (
+            self.item_emb_dim
+            + config.EMBED_DIMS["video_category"]
+            + config.EMBED_DIMS["gender"]
+            + config.EMBED_DIMS["age"]
+            + config.ATTN_PROJ_DIM  # interest_vec from projected attention
+        )
+
         # Final concat -> LayerNorm -> MLP head
-        self.norm = nn.LayerNorm(config.FINAL_DIM)
+        self.norm = nn.LayerNorm(fused_dim)
         layers = []
-        in_dim = config.FINAL_DIM
+        in_dim = fused_dim
         for h in config.MLP_DIMS:
             layers += [
                 nn.Linear(in_dim, h),
@@ -296,35 +387,97 @@ class CTRModel(nn.Module):
         self.mlp = nn.Sequential(*layers)
         self.head = nn.Linear(in_dim, 1)
 
-    def forward(self, batch: dict) -> torch.Tensor:
+    def forward(self, batch: dict, return_aux: bool = False):
         item_id = batch["item_id"]
         hist = batch["hist"]
 
-        cand_emb = self.item_emb(item_id)                       # (B, 64)
-        hist_emb = self.item_emb(hist)                          # (B, L, 64) shared
+        cand_emb = self.item_emb(item_id)                       # (B, item_emb_dim)
+        hist_emb = self.item_emb(hist)                          # (B, L, item_emb_dim) shared
 
         cat_emb = self.cat_emb(batch["video_category"])         # (B, 16)
         gender_emb = self.gender_emb(batch["gender"])           # (B, 4)
         age_emb = self.age_emb(batch["age"])                    # (B, 8)
 
-        eng = self.engagement(
-            torch.stack([batch["follow"], batch["like"], batch["share"]], dim=1)
-        )                                                       # (B, 16)
-        watch = self.watch(batch["watching_times"].unsqueeze(1))  # (B, 8)
-
         interest = self.history_attn(cand_emb, hist_emb, batch["hist_mask"])  # (B, 64)
 
+        # follow/like/share/watching_times removed (target leakage).
         fused = torch.cat(
-            [cand_emb, cat_emb, gender_emb, age_emb, eng, watch, interest], dim=1
-        )                                                       # (B, 180)
+            [cand_emb, cat_emb, gender_emb, age_emb, interest], dim=1
+        )                                                       # (B, fused_dim)
         fused = self.norm(fused)
         x = self.mlp(fused)
         logit = self.head(x).squeeze(1)                         # (B,)
+
+        if return_aux and self.aux_encoder is not None:
+            aux = self._aux_loss(batch, hist_emb)
+            return logit, aux
         return logit  # raw logits; apply sigmoid at inference time
 
+    def _aux_loss(self, batch: dict, hist_emb: torch.Tensor) -> torch.Tensor:
+        """DIEN-style next-item auxiliary loss over the history sequence.
 
-def build_model(device: str = "cpu") -> CTRModel:
-    model = CTRModel().to(device)
+        For each step t in 0..L-2, predict hist[:, t+1] (the POSITIVE next
+        item) from the GRU hidden state after hist[0..t], and push it away from
+        in-batch negatives (the candidate item_id pool, NOT the same sample's
+        history -> no positive/negative leakage). Mean BCE over valid (non-padding)
+        steps. Supervises the shared item embedding. Returns a scalar (0-dim).
+        """
+        # output: (B, L, H) hidden state at EVERY timestep; we use output[:, t]
+        # (NOT the GRU's final hidden) to predict the next item.
+        output, _ = self.aux_encoder(hist_emb)
+        L = hist_emb.size(1)
+        device = hist_emb.device
+
+        item_id = batch["item_id"]                              # (B,) in-batch neg pool
+        hist = batch["hist"]                                   # (B, L)
+        hist_mask = batch["hist_mask"]                          # (B, L) bool
+
+        # Candidate embeddings for negatives, computed ONCE for the whole batch.
+        neg_emb_full = self.item_emb(item_id)                  # (B, H)
+        k = config.AUX_NEG_SAMPLES
+
+        ones = torch.ones(hist_emb.size(0), device=device)
+        zeros = torch.zeros(hist_emb.size(0), k, device=device)
+
+        total = torch.zeros((), device=device)
+        n_valid = 0
+        for t in range(L - 1):                                # t=0..L-2 -> predicts hist[:, t+1]
+            # Both hist[t] and hist[t+1] must be real (non-padding) to be a
+            # valid prediction step; excludes padding and predicting item_id==0.
+            step_mask = hist_mask[:, t] & hist_mask[:, t + 1]  # (B,) bool
+            if not step_mask.any():
+                continue
+
+            h_t = output[:, t, :]                             # (B, H) hidden after hist[0..t]
+            h_t = self.aux_proj(h_t)                          # (B, item_emb_dim)
+            pos_ids = hist[:, t + 1]                          # (B,) next item (POSITIVE)
+            pos_score = (h_t * self.item_emb(pos_ids)).sum(-1)   # (B,) dot product
+
+            # Shared k in-batch negatives (subsampled -> O(B*H*k), CPU-safe).
+            neg_idx = torch.randint(0, item_id.size(0), (k,), device=device)
+            neg_scores = h_t @ neg_emb_full[neg_idx].t()      # (B, k) finite
+            # Leakage guard: a negative that equals the positive next item is a
+            # false positive-as-negative. EXCLUDE it (weight 0) instead of
+            # masking to -inf, because -inf logits make BCE_with_logits return
+            # NaN (it computes -input*target = inf*0 = NaN).
+            eq = pos_ids.unsqueeze(1) == item_id[neg_idx].unsqueeze(0)  # (B, k)
+            neg_weight = (~eq).float()                        # 1 valid, 0 leaked
+
+            pos_term = F.binary_cross_entropy_with_logits(
+                pos_score, ones, reduction="none"
+            )
+            neg_term = F.binary_cross_entropy_with_logits(
+                neg_scores, zeros, reduction="none"
+            )                                                  # (B, k) finite
+            neg_term = (neg_term * neg_weight).sum(1) / neg_weight.sum(1).clamp(min=1)  # (B,)
+            total = total + ((pos_term + neg_term) * step_mask.float()).sum()
+            n_valid += int(step_mask.sum().item())
+
+        return total / max(n_valid, 1)
+
+
+def build_model(device: str = "cpu", item_embed_method: str = config.ITEM_EMBED_METHOD) -> CTRModel:
+    model = CTRModel(item_embed_method=item_embed_method).to(device)
     return model
 
 

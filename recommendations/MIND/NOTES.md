@@ -631,3 +631,81 @@ pass an existing parent). Each run folder contains `best_model.pt`, `checkpoint_
 InTime IAUC 0.6466, OutTime IAUC 0.5358, MRR 0.2740; all 5 checkpoint files persisted and
 downloaded back successfully.
 
+---
+
+## 23. Hard-Negative Mining Stage (`--train_mode listwise_hn`)
+
+**Purpose**: Industry-aligned two-stage retraining. Instead of training the NRMS reranker on
+MIND's *random* impression negatives (which a real retriever would never surface), we first
+**mine hard negatives with a trained dense retriever**, then train the ranker to separate
+clicked news from *retrieved-but-unclicked* news. This makes the retrieval → reranking loop
+co-adapt (the dominant DPR / RocketQA / EMB pattern).
+
+**Where it lives (delegation, not a separate Modal phase)**:
+- `src/retrieval.py`: `DenseRetriever` (MiniLM dense embeddings + sklearn ANN) and
+  `mine_hard_negatives(retriever, behaviors_df, news_id_to_idx, num_hn, ...)`.
+- `src/data.py`: `prepare_data()` `listwise_hn` branch (`src/data.py:660`) builds the
+  retriever index, mines, then calls `build_impression_samples_hn()` to assemble
+  `(history, [positives + mined hard negatives], labels)`.
+- `main.py`: `--train_mode listwise_hn` (choice), plus `--mine_num_hn` (default 4 = NRMS/MIND
+  K), `--mine_model` (default MiniLM), `--mine_cache_dir`, `--mine_max_news` (cap the mining
+  corpus for smoke tests; `None` = full ~65k corpus).
+- `run_nrms_mind.py`: **does NOT re-implement retrieval**. `train_phase` runs
+  `python -u main.py --phase train ...`, and `_build_main_args` forwards the mine flags when
+  `train_mode == "listwise_hn"` (`--mine-num-hn`, `--mine-model`, `--mine-cache-dir`,
+  `--mine-max-news`). So `run_nrms_mind.py` "does what main.py does" for retrieval by
+  delegating to the same code path — keeping the launcher and `main.py` in lockstep.
+
+**Mining algorithm** (`mine_hard_negatives`):
+1. Encode the user's clicked **history** (mean-pooled query) with the `DenseRetriever`.
+2. Retrieve the top-`(num_hn + 20)` most similar news from the corpus ANN index.
+3. Drop any news already **shown** in this impression (clicked OR impression negatives) so
+   the hard negatives are genuinely *unseen* but *confusable*.
+4. Keep the top `num_hn` remaining as hard negatives. Impressions with no positive or no
+   usable history are skipped (consistent with `flatten_impressions`).
+
+**Verified end-to-end** (local, `data/MINDsmall_*`):
+```
+[4b] Mining hard negatives with DenseRetriever (MiniLM) [corpus=2000 news] ...
+  [DenseRetriever] loading 'sentence-transformers/all-MiniLM-L6-v2' (cache=cache)
+Training impressions (listwise_hn, mined 4 neg/imp): 97
+Epoch 1/1 | Train Loss: 2.6943 | OutTime AUC: 0.4816 | MRR: 0.2701
+Checkpoint saved to .../best_model.pt
+```
+`run_nrms_mind.py` import + `tests/_bench_modal_smoke.py` confirm the `listwise_hn` argv
+forwards all mine flags and `main.py` accepts them.
+
+**Usage**:
+```bash
+# Local smoke (small mining corpus + few impressions)
+python main.py --epochs 1 --use_hf_embeddings --bottleneck_dim 64 --train_mode listwise_hn \
+  --mine_num_hn 4 --mine_max_news 2000 --max_train_impressions 200 --max_dev_impressions 100
+
+# Modal (full corpus; GPU)
+modal run --detach run_nrms_mind.py --run-name exp_hn --epochs 5 --train-mode listwise_hn \
+  --mine-num-hn 4 --use-hf-embeddings --bottleneck-dim 64
+```
+
+### Additional benefit of the new stage vs. without it
+
+| Aspect | Without mining (`pointwise` / `listwise`) | With `listwise_hn` (mined hard negatives) |
+|---|---|---|
+| **Negative quality** | MIND's *random* impression negatives — a real retriever would never surface them, so the ranker learns to separate clicks from trivially-easy random items. | **Retrieved-but-unclicked** negatives — hard, confusable items the retriever actually ranks near the user, forcing the ranker to learn fine-grained relevance. |
+| **Retrieval↔rerank co-adaptation** | Reranker and retriever trained independently; the reranker is never exposed to the retriever's actual mistakes. | Reranker is trained *on the retriever's own top-K errors* → the two stages co-adapt (the DPR/RocketQA/EMB recipe that dominates production recsys). |
+| **Train/serving alignment** | Training negatives ≠ what the deployed retriever feeds the reranker → train/serve skew. | Training negatives ≈ the deployed retriever's output distribution → far less train/serve skew. |
+| **Signal-to-noise** | Many random negatives are near-duplicates of the positive or totally irrelevant; gradient is noisy. | Hard negatives carry a strong, informative gradient (the model must learn *why* a near-miss is still unclicked). |
+| **Difficulty curriculum** | Fixed, easy negatives. | Naturally **curriculum-like**: as the retriever improves, the mined negatives get harder, continuously challenging the ranker. |
+| **Eval realism** | Reranker metrics measured against random distractors. | Reranker metrics measured against the *same kind* of candidates it will see in production (retrieved set). |
+| **Cost / control** | N/A. | `--mine_max_news` caps the mining corpus for fast smoke tests (2000 news ≈ seconds on CPU); omit for the full run. `--mine_num_hn` controls K. |
+
+**Caveat (expected, not a bug)**: MIND impressions use *random* negatives, so a content
+retriever structurally cannot recover them → `recall@k ≈ 0` on small corpus slices is
+expected. The benefit of mining is in the *training signal*, not in retrieval recall on
+MIND's held-out random negatives. Full-corpus runs recover meaningful recall.
+
+**Note on `run_nrms_mind.py` design choice**: retrieval was deliberately kept **coupled to the
+train phase** (matching `main.py`) rather than split into a standalone `mine`/`retrieval`
+Modal phase. A separate phase would let you mine-once-train-many (persist mined negatives to
+the Volume), but it would diverge from `main.py`'s structure. The current design guarantees
+`run_nrms_mind.py` does exactly what `main.py` does.
+
