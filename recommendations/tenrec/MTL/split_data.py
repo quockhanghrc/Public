@@ -16,9 +16,10 @@ Outputs:
   data/split/stats.json   (pos rate, split sizes, and the train/val/test
                           frac ratios used)
 
-  NOTE: follow / like / share / watching_times are DROPPED from the written
-  parquet (and from stats). They are post-click engagement signals, so using
-  them as features is target leakage.
+  NOTE: By default, no columns are dropped. Use --remove-cols to optionally
+  remove redundant or target-leakage columns from the output parquet.
+  watching_times is kept (needed for watch_norm feature).
+  follow/like/share are kept (they are MTL target labels).
 
 Idempotent: if data/split already exists and is non-empty, it is skipped unless
 --force is passed. With --force, any stale ctr_part_*.parquet files from a
@@ -31,6 +32,7 @@ import json
 import os
 import time
 from pathlib import Path
+from typing import List, Optional
 
 import pandas as pd
 import pyarrow.parquet as pq
@@ -84,7 +86,8 @@ def _safe_unlink(path: Path, retries: int = 5, delay: float = 0.5):
 
 
 def run_split(train_frac: float, val_frac: float, test_frac: float,
-               rows_per_file: int = 2_000_000, force: bool = False) -> dict:
+               rows_per_file: int = 2_000_000, force: bool = False,
+               remove_cols: Optional[List[str]] = None) -> dict:
     """Perform the user-level hash split and write data/split/ + stats.json.
 
     Returns the stats dict that was written (so callers can reload it).
@@ -149,12 +152,12 @@ def run_split(train_frac: float, val_frac: float, test_frac: float,
                 seen_users.update(part["user_id"].unique().tolist())
 
                 if buffered_rows[split] >= rows_per_file:
-                    _flush(config.SPLIT_DIR, split, buffers, file_index)
+                    _flush(config.SPLIT_DIR, split, buffers, file_index, remove_cols)
                     buffered_rows[split] = 0
 
     for split in ("train", "val", "test"):
         if buffers[split]:
-            _flush(config.SPLIT_DIR, split, buffers, file_index)
+            _flush(config.SPLIT_DIR, split, buffers, file_index, remove_cols)
 
     stats = {
         "pos_rate": float(pos_sum / total) if total else 0.0,
@@ -176,15 +179,15 @@ def run_split(train_frac: float, val_frac: float, test_frac: float,
     return stats
 
 
-def _flush(split_dir: Path, split: str, buffers: dict, file_index: dict):
+def _flush(split_dir: Path, split: str, buffers: dict, file_index: dict,
+           remove_cols: Optional[List[str]] = None):
     out_df = pd.concat(buffers[split], ignore_index=True)
-    # Drop post-click engagement columns (target leakage): follow/like/share/
-    # watching_times. Keep everything else (incl. click = the label).
-    # It MTL so no need filter-out any label
-    #leak_cols = [c for c in ("follow", "like", "share", "watching_times") if c in out_df.columns]
-    leak_cols =[]
-    if leak_cols:
-        out_df = out_df.drop(columns=leak_cols)
+    # Drop specified columns (e.g. redundant or target-leakage columns).
+    # By default, no columns are dropped — all are kept for training.
+    if remove_cols:
+        drop = [c for c in remove_cols if c in out_df.columns]
+        if drop:
+            out_df = out_df.drop(columns=drop)
     out_path = split_dir / split / f"ctr_part_{file_index[split]:04d}.parquet"
     out_df.to_parquet(out_path, engine="pyarrow", index=False)
     print(f"  wrote {out_path}  ({len(out_df):,} rows)")
@@ -201,9 +204,13 @@ def main():
                    help="Rows per output parquet shard.")
     p.add_argument("--force", action="store_true",
                    help="Re-split even if data/split already exists.")
+    p.add_argument("--remove-cols", nargs="*", default=None,
+                   help="Optional list of column names to drop from the output parquet "
+                        "(e.g. redundant or target-leakage columns).")
     args = p.parse_args()
     run_split(args.train_frac, args.val_frac, args.test_frac,
-              rows_per_file=args.rows_per_file, force=args.force)
+              rows_per_file=args.rows_per_file, force=args.force,
+              remove_cols=args.remove_cols)
 
 
 if __name__ == "__main__":
