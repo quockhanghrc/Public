@@ -2465,3 +2465,1011 @@
 2026-08-02 15:57:55,388 | INFO    |   Gate distribution plot saved to ./runs\20260802_154553\diagnostics_step300_gate_dist.png
 2026-08-02 15:57:55,408 | INFO    |   Markdown report saved to ./runs\20260802_154553\diagnostics_step300_report.md
 2026-08-02 15:57:56,392 | INFO    | Training complete. Run directory: ./runs\20260802_154553
+2026-08-02 23:43:46,203 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-02 23:43:46,287 | INFO    | Run directory: ./runs\20260802_234346
+2026-08-02 23:43:46,289 | INFO    | Verifying cache integrity …
+2026-08-02 23:43:46,353 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-02 23:43:46,415 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-02 23:43:46,476 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-02 23:43:46,477 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-02 23:43:46,567 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-02 23:43:46,569 | WARNING | DataLoader workers disabled on CPU — using num_workers=0
+2026-08-02 23:43:46,569 | INFO    | Vocab — users:599668  items:1912866  categories:3  genders:3
+2026-08-02 23:43:46,570 | INFO    | Effective batch size: 1024 × 1 = 1024
+2026-08-02 23:43:46,571 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-02 23:43:49,241 | INFO    | Params — total: 161330100  |  trainable: 161330100
+2026-08-02 23:43:53,718 | INFO    | ============================================================
+2026-08-02 23:43:53,719 | INFO    | STARTING TRAINING
+2026-08-02 23:43:53,719 | INFO    | ============================================================
+2026-08-02 23:44:52,000 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-02 23:44:52,012 | INFO    | Run directory: ./runs\20260802_234452
+2026-08-02 23:44:52,013 | INFO    | Verifying cache integrity …
+2026-08-02 23:44:52,016 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-02 23:44:52,018 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-02 23:44:52,020 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-02 23:44:52,020 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-02 23:44:52,091 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-02 23:44:52,091 | WARNING | DataLoader workers disabled on CPU — using num_workers=0
+2026-08-02 23:44:52,091 | INFO    | Vocab — users:599668  items:1912866  categories:3  genders:3
+2026-08-02 23:44:52,092 | INFO    | Effective batch size: 1024 × 1 = 1024
+2026-08-02 23:44:52,092 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-02 23:44:53,941 | INFO    | Params — total: 161330100  |  trainable: 161330100
+2026-08-02 23:44:56,444 | INFO    | ============================================================
+2026-08-02 23:44:56,444 | INFO    | STARTING TRAINING
+2026-08-02 23:44:56,444 | INFO    | ============================================================
+2026-08-02 23:48:50,484 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-02 23:48:50,503 | INFO    | Run directory: ./runs\20260802_234850
+2026-08-02 23:48:50,503 | INFO    | Verifying cache integrity …
+2026-08-02 23:48:50,505 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-02 23:48:50,508 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-02 23:48:50,510 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-02 23:48:50,510 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-02 23:48:50,582 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-02 23:48:50,582 | WARNING | DataLoader workers disabled on CPU — using num_workers=0
+2026-08-02 23:48:50,583 | INFO    | Vocab — users:599668  items:1912866  categories:3  genders:3
+2026-08-02 23:48:50,583 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-02 23:48:50,584 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-02 23:48:52,270 | INFO    | Params — total: 161330100  |  trainable: 161330100
+2026-08-02 23:48:54,832 | INFO    | ============================================================
+2026-08-02 23:48:54,832 | INFO    | STARTING TRAINING
+2026-08-02 23:48:54,832 | INFO    | ============================================================
+2026-08-02 23:49:57,150 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-02 23:49:57,168 | INFO    | Run directory: ./runs\20260802_234957
+2026-08-02 23:49:57,169 | INFO    | Verifying cache integrity …
+2026-08-02 23:49:57,170 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-02 23:49:57,177 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-02 23:49:57,180 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-02 23:49:57,180 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-02 23:49:57,251 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-02 23:49:57,252 | WARNING | DataLoader workers disabled on CPU — using num_workers=0
+2026-08-02 23:49:57,252 | INFO    | Vocab — users:599668  items:1912866  categories:3  genders:3
+2026-08-02 23:49:57,253 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-02 23:49:57,253 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-02 23:49:58,860 | INFO    | Params — total: 161330100  |  trainable: 161330100
+2026-08-02 23:50:01,483 | INFO    | ============================================================
+2026-08-02 23:50:01,483 | INFO    | STARTING TRAINING
+2026-08-02 23:50:01,483 | INFO    | ============================================================
+2026-08-02 23:52:25,866 | INFO    | Step    100 | loss: 1.9257 | click=0.6490  follow=0.5220  like=0.3545  share=0.3739
+2026-08-02 23:55:00,524 | INFO    | Step    200 | loss: 0.9633 | click=0.6035  follow=0.1186  like=0.1341  share=0.0969
+2026-08-02 23:55:08,530 | INFO    | === Step    200 | val_loss: 0.7886 | mean_auc: 0.5136 | click=0.5216  follow=0.5029  like=0.5401  share=0.4897
+2026-08-02 23:55:11,761 | INFO    |   → New best model saved (AUC=0.5136) at ./checkpoints\best_model.pt
+2026-08-02 23:57:44,511 | INFO    | Step    300 | loss: 0.8113 | click=0.5605  follow=0.0567  like=0.1396  share=0.0507
+2026-08-02 23:59:54,134 | INFO    | Step    400 | loss: 0.7300 | click=0.5626  follow=0.0394  like=0.0922  share=0.0328
+2026-08-02 23:59:58,932 | INFO    | === Step    400 | val_loss: 0.7166 | mean_auc: 0.5180 | click=0.5537  follow=0.5039  like=0.5141  share=0.5003
+2026-08-03 00:00:02,103 | INFO    |   → New best model saved (AUC=0.5180) at ./checkpoints\best_model.pt
+2026-08-03 00:02:14,138 | INFO    | Step    500 | loss: 0.7445 | click=0.5526  follow=0.0373  like=0.1265  share=0.0258
+2026-08-03 00:04:37,677 | INFO    | Step    600 | loss: 0.6817 | click=0.5415  follow=0.0242  like=0.0932  share=0.0210
+2026-08-03 00:04:42,307 | INFO    | === Step    600 | val_loss: 0.6965 | mean_auc: 0.5418 | click=0.5939  follow=0.4928  like=0.5715  share=0.5089
+2026-08-03 00:04:45,559 | INFO    |   → New best model saved (AUC=0.5418) at ./checkpoints\best_model.pt
+2026-08-03 00:06:58,658 | INFO    | Step    700 | loss: 0.7110 | click=0.5401  follow=0.0216  like=0.1250  share=0.0227
+2026-08-03 00:09:26,541 | INFO    | Step    800 | loss: 0.6865 | click=0.5347  follow=0.0235  like=0.1076  share=0.0194
+2026-08-03 00:09:31,408 | INFO    | === Step    800 | val_loss: 0.6857 | mean_auc: 0.5580 | click=0.6107  follow=0.5218  like=0.5566  share=0.5429
+2026-08-03 00:09:34,625 | INFO    |   → New best model saved (AUC=0.5580) at ./checkpoints\best_model.pt
+2026-08-03 18:53:44,422 | INFO    | Logging to file: d:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 18:54:43,858 | INFO    | Logging to file: d:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 18:55:02,772 | INFO    | Logging to file: d:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 18:59:44,465 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 19:13:58,027 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 19:13:58,128 | INFO    | Using device: privateuseone:0
+2026-08-03 19:13:58,132 | INFO    | Run directory: ./runs\20260803_191358
+2026-08-03 19:13:58,132 | INFO    | Verifying cache integrity …
+2026-08-03 19:13:58,181 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 19:13:58,247 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 19:13:58,303 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 19:13:58,303 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 19:13:58,387 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 19:13:58,387 | INFO    | Vocab — users:599668  items:1912866  categories:3  genders:3
+2026-08-03 19:13:58,387 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 19:13:58,387 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-03 19:14:01,006 | INFO    | Params — total: 161306988  |  trainable: 161306988
+2026-08-03 19:14:05,170 | INFO    | ============================================================
+2026-08-03 19:14:05,170 | INFO    | STARTING TRAINING
+2026-08-03 19:14:05,170 | INFO    | ============================================================
+2026-08-03 19:14:40,492 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 19:15:44,557 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 19:19:52,255 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 19:19:52,433 | INFO    | Using device: privateuseone:0
+2026-08-03 19:19:52,442 | INFO    | Run directory: ./runs\20260803_191952
+2026-08-03 19:19:52,444 | INFO    | Verifying cache integrity …
+2026-08-03 19:19:52,450 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 19:19:52,457 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 19:19:52,468 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 19:19:52,468 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 19:19:52,546 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 19:19:52,551 | INFO    | Vocab — users:599668  items:1912866  categories:3  genders:3
+2026-08-03 19:19:52,551 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 19:19:52,551 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-03 19:19:56,029 | INFO    | Params — total: 161306988  |  trainable: 161306988
+2026-08-03 19:20:00,415 | INFO    | ============================================================
+2026-08-03 19:20:00,415 | INFO    | STARTING TRAINING
+2026-08-03 19:20:00,415 | INFO    | ============================================================
+2026-08-03 19:20:29,907 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 19:22:50,870 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 19:22:51,022 | INFO    | Using device: privateuseone:0
+2026-08-03 19:22:51,042 | INFO    | Run directory: ./runs\20260803_192251
+2026-08-03 19:22:51,044 | INFO    | Verifying cache integrity …
+2026-08-03 19:22:51,057 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 19:22:51,067 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 19:22:51,074 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 19:22:51,074 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 19:22:51,146 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 19:22:51,146 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 19:22:51,154 | INFO    | Vocab — users:599668  items:1912866  categories:3  genders:3
+2026-08-03 19:22:51,154 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 19:22:51,156 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-03 19:22:54,423 | INFO    | Params — total: 161306988  |  trainable: 161306988
+2026-08-03 19:22:58,599 | INFO    | ============================================================
+2026-08-03 19:22:58,599 | INFO    | STARTING TRAINING
+2026-08-03 19:22:58,599 | INFO    | ============================================================
+2026-08-03 19:24:56,862 | INFO    | ============================================================
+2026-08-03 19:24:56,864 | INFO    | FINAL: Test evaluation
+2026-08-03 19:24:56,864 | INFO    | ============================================================
+2026-08-03 19:26:49,966 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 19:26:50,043 | INFO    | Using device: privateuseone:0
+2026-08-03 19:26:50,049 | INFO    | Run directory: ./runs\20260803_192650
+2026-08-03 19:26:50,054 | INFO    | Verifying cache integrity …
+2026-08-03 19:26:50,057 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 19:26:50,061 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 19:26:50,064 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 19:26:50,064 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 19:26:50,104 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 19:26:50,104 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 19:26:50,104 | INFO    | Vocab — users:599668  items:1912866  categories:3  genders:3
+2026-08-03 19:26:50,106 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 19:26:50,106 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-03 19:26:53,412 | INFO    | Params — total: 161306988  |  trainable: 161306988
+2026-08-03 19:26:56,651 | INFO    | ============================================================
+2026-08-03 19:26:56,651 | INFO    | STARTING TRAINING
+2026-08-03 19:26:56,651 | INFO    | ============================================================
+2026-08-03 19:29:15,778 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 19:29:15,780 | INFO    | Using device: cpu
+2026-08-03 19:29:15,809 | INFO    | Run directory: ./runs\20260803_192915
+2026-08-03 19:29:15,809 | INFO    | Verifying cache integrity …
+2026-08-03 19:29:15,810 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 19:29:15,818 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 19:29:15,818 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 19:29:15,818 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 19:29:15,863 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 19:29:15,863 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 19:29:15,863 | INFO    | Vocab — users:599668  items:1912866  categories:3  genders:3
+2026-08-03 19:29:15,863 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 19:29:15,863 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-03 19:29:18,532 | INFO    | Params — total: 161306988  |  trainable: 161306988
+2026-08-03 19:29:22,696 | INFO    | ============================================================
+2026-08-03 19:29:22,696 | INFO    | STARTING TRAINING
+2026-08-03 19:29:22,696 | INFO    | ============================================================
+2026-08-03 21:01:44,593 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:02:13,586 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:02:33,831 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:03:12,731 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:03:12,789 | INFO    |   ✅ Cache valid: 100 rows
+2026-08-03 21:03:12,794 | WARNING |   ❌ Cache cat_cols mismatch: stored=['user_id', 'item_id', 'video_category', 'gender'], current=['user_id', 'item_id', 'video_category']
+2026-08-03 21:03:12,797 | WARNING |   ❌ Cache hist_cols mismatch: stored=['hist_1', 'hist_2', 'hist_3', 'hist_4', 'hist_5', 'hist_6', 'hist_7', 'hist_8', 'hist_9', 'hist_10'], current=['hist_1', 'hist_2']
+2026-08-03 21:03:26,795 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:03:49,344 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:04:09,564 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:04:27,828 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:05:12,861 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:05:33,023 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:05:54,649 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:06:26,490 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:12:48,027 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:13:15,152 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:13:32,590 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:16:08,687 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:16:08,700 | INFO    | Using device: cpu
+2026-08-03 21:16:08,774 | INFO    | Run directory: ./runs\20260803_211608
+2026-08-03 21:16:08,775 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 21:16:08,776 | INFO    | Verifying cache integrity …
+2026-08-03 21:16:08,846 | WARNING |   ❌ Cache cat_cols mismatch: stored=None, current=['item_id', 'video_category', 'gender']
+2026-08-03 21:16:08,908 | WARNING |   ❌ Cache cat_cols mismatch: stored=None, current=['item_id', 'video_category', 'gender']
+2026-08-03 21:16:08,977 | WARNING |   ❌ Cache cat_cols mismatch: stored=None, current=['item_id', 'video_category', 'gender']
+2026-08-03 21:16:08,977 | WARNING | ⚠️  Cache integrity check failed — will reprocess
+2026-08-03 21:16:08,977 | INFO    | Preprocessing data → cache …
+2026-08-03 21:16:08,981 | INFO    | Fitting encoders on training data (chunked) …
+2026-08-03 21:18:04,155 | INFO    |   item_id: 1912866 unique values
+2026-08-03 21:18:04,155 | INFO    |   video_category: 3 unique values
+2026-08-03 21:18:04,155 | INFO    |   gender: 3 unique values
+2026-08-03 21:18:04,155 | INFO    |   item_id (incl. history): 1912866 unique values
+2026-08-03 21:18:04,506 | INFO    | Preprocessing & caching: ./data/split\train → ./cache\train
+2026-08-03 21:18:04,537 | INFO    |   Total rows: 72161769
+2026-08-03 21:18:04,636 | INFO    |   Dense features: ['age_norm'] (n=1)
+2026-08-03 21:26:03,206 | INFO    |   ✓ Cached 72161769 rows to ./cache\train_*.npy
+2026-08-03 21:26:04,705 | INFO    | Preprocessing & caching: ./data/split\val → ./cache\val
+2026-08-03 21:26:04,867 | INFO    |   Total rows: 24148450
+2026-08-03 21:26:04,997 | INFO    |   Dense features: ['age_norm'] (n=1)
+2026-08-03 21:28:43,740 | INFO    |   ✓ Cached 24148450 rows to ./cache\val_*.npy
+2026-08-03 21:28:44,256 | INFO    | Preprocessing & caching: ./data/split\test → ./cache\test
+2026-08-03 21:28:44,406 | INFO    |   Total rows: 24032087
+2026-08-03 21:28:44,527 | INFO    |   Dense features: ['age_norm'] (n=1)
+2026-08-03 21:31:33,606 | INFO    |   ✓ Cached 24032087 rows to ./cache\test_*.npy
+2026-08-03 21:31:34,178 | INFO    |   ✓ Encoders saved
+2026-08-03 21:31:34,349 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 21:31:34,349 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 21:31:34,356 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 21:31:34,356 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 21:31:34,356 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-03 21:31:35,873 | INFO    | Params — total: 122846252  |  trainable: 122846252
+2026-08-03 21:31:40,325 | INFO    | ============================================================
+2026-08-03 21:31:40,325 | INFO    | STARTING TRAINING
+2026-08-03 21:31:40,326 | INFO    | ============================================================
+2026-08-03 21:33:45,625 | INFO    | Step    100 | loss: 1.8842 | click=0.6042  follow=0.3574  like=0.6303  share=0.2632
+2026-08-03 21:35:47,681 | INFO    | Step    200 | loss: 0.9806 | click=0.6044  follow=0.0973  like=0.1960  share=0.0668
+2026-08-03 21:35:57,116 | INFO    | === Step    200 | val_loss: 0.8242 | mean_auc: 0.5251 | click=0.5381  follow=0.4922  like=0.5202  share=0.5497
+2026-08-03 21:36:00,496 | INFO    |   → New best model saved (AUC=0.5251) at ./checkpoints\best_model.pt
+2026-08-03 21:38:08,436 | INFO    | Step    300 | loss: 0.8057 | click=0.5629  follow=0.0401  like=0.1582  share=0.0360
+2026-08-03 21:39:44,490 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:39:44,490 | INFO    | Using device: cpu
+2026-08-03 21:39:44,531 | INFO    | Run directory: ./runs\20260803_213944
+2026-08-03 21:39:44,532 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 21:39:44,533 | INFO    | Verifying cache integrity …
+2026-08-03 21:39:44,540 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 21:39:44,546 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 21:39:44,552 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 21:39:44,553 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 21:39:44,610 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 21:39:44,610 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 21:39:44,610 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 21:39:44,613 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 21:39:44,613 | INFO    | Tasks: ['click', 'follow', 'like', 'share']  |  Experts: 4
+2026-08-03 21:39:44,958 | INFO    | Params — total: 30964124  |  trainable: 30964124
+2026-08-03 21:39:47,991 | INFO    | ============================================================
+2026-08-03 21:39:47,991 | INFO    | STARTING TRAINING
+2026-08-03 21:39:47,992 | INFO    | ============================================================
+2026-08-03 21:40:20,703 | INFO    | Step    100 | loss: 1.6094 | click=0.6396  follow=0.4296  like=0.2908  share=0.2217
+2026-08-03 21:40:47,585 | INFO    | Step    200 | loss: 0.8989 | click=0.6073  follow=0.1046  like=0.1213  share=0.0547
+2026-08-03 21:40:51,288 | INFO    | === Step    200 | val_loss: 0.7678 | mean_auc: 0.5184 | click=0.5229  follow=0.5033  like=0.5250  share=0.5223
+2026-08-03 21:40:51,992 | INFO    |   → New best model saved (AUC=0.5184) at ./checkpoints\best_model.pt
+2026-08-03 21:41:17,382 | INFO    | Step    300 | loss: 0.7862 | click=0.5640  follow=0.0518  like=0.1359  share=0.0310
+2026-08-03 21:41:45,533 | INFO    | Step    400 | loss: 0.7142 | click=0.5656  follow=0.0348  like=0.0898  share=0.0222
+2026-08-03 21:41:50,895 | INFO    | === Step    400 | val_loss: 0.7102 | mean_auc: 0.4999 | click=0.5386  follow=0.4798  like=0.4840  share=0.4974
+2026-08-03 21:41:50,896 | INFO    |   → No improvement (1/10 checks)
+2026-08-03 21:42:18,354 | INFO    | Step    500 | loss: 0.7336 | click=0.5550  follow=0.0334  like=0.1246  share=0.0195
+2026-08-03 21:42:47,134 | INFO    | Step    600 | loss: 0.6792 | click=0.5482  follow=0.0212  like=0.0917  share=0.0172
+2026-08-03 21:42:52,599 | INFO    | === Step    600 | val_loss: 0.6966 | mean_auc: 0.5310 | click=0.5507  follow=0.5021  like=0.5425  share=0.5286
+2026-08-03 21:42:53,338 | INFO    |   → New best model saved (AUC=0.5310) at ./checkpoints\best_model.pt
+2026-08-03 21:43:23,413 | INFO    | Step    700 | loss: 0.7093 | click=0.5452  follow=0.0193  like=0.1241  share=0.0200
+2026-08-03 21:43:52,502 | INFO    | Step    800 | loss: 0.6885 | click=0.5401  follow=0.0221  like=0.1082  share=0.0175
+2026-08-03 21:43:56,308 | INFO    | === Step    800 | val_loss: 0.6897 | mean_auc: 0.5406 | click=0.5874  follow=0.4864  like=0.5529  share=0.5355
+2026-08-03 21:43:56,916 | INFO    |   → New best model saved (AUC=0.5406) at ./checkpoints\best_model.pt
+2026-08-03 21:44:23,596 | INFO    | Step    900 | loss: 0.6596 | click=0.5523  follow=0.0146  like=0.0752  share=0.0171
+2026-08-03 21:44:52,426 | INFO    | Step   1000 | loss: 0.6741 | click=0.5312  follow=0.0146  like=0.1087  share=0.0191
+2026-08-03 21:44:57,955 | INFO    | === Step   1000 | val_loss: 0.6842 | mean_auc: 0.5499 | click=0.5963  follow=0.4949  like=0.5655  share=0.5429
+2026-08-03 21:44:58,619 | INFO    |   → New best model saved (AUC=0.5499) at ./checkpoints\best_model.pt
+2026-08-03 21:44:58,619 | INFO    |   --- Running diagnostics ---
+2026-08-03 21:46:02,180 | INFO    |   Diagnostics saved to ./runs\20260803_213944\diagnostics_step1000.json
+2026-08-03 21:46:02,181 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 21:46:02,182 | INFO    |     Expert 0: strongest task=follow (grad_norm=0.0015) | follow=0.0015, like=0.0015, share=0.0015
+2026-08-03 21:46:02,182 | INFO    |     Expert 1: strongest task=share (grad_norm=0.0006) | share=0.0006, like=0.0006, follow=0.0000
+2026-08-03 21:46:02,184 | INFO    |     Expert 2: strongest task=share (grad_norm=0.0003) | share=0.0003, like=0.0003, follow=0.0000
+2026-08-03 21:46:02,184 | INFO    |     Expert 3: strongest task=share (grad_norm=0.0020) | share=0.0020, follow=0.0020, like=0.0020
+2026-08-03 21:46:02,185 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 21:46:02,185 | INFO    |     click: click=1.000, follow=1.000, like=0.000, share=0.505
+2026-08-03 21:46:02,187 | INFO    |     follow: click=1.000, follow=1.000, like=0.017, share=0.520
+2026-08-03 21:46:02,188 | INFO    |     like: click=0.000, follow=0.017, like=1.000, share=0.508
+2026-08-03 21:46:02,189 | INFO    |     share: click=0.505, follow=0.520, like=0.508, share=1.000
+2026-08-03 21:46:02,190 | INFO    |   === Gate Entropy ===
+2026-08-03 21:46:02,190 | INFO    |     click: 0.6944
+2026-08-03 21:46:02,191 | INFO    |     follow: 0.7664
+2026-08-03 21:46:02,191 | INFO    |     like: 0.6936
+2026-08-03 21:46:02,191 | INFO    |     share: 0.7623
+2026-08-03 21:46:02,192 | INFO    |   ⚠️  Gate similarity click↔follow = 1.000 (>0.9): gates are nearly identical — tasks may not need separate gates
+2026-08-03 21:46:02,193 | INFO    |   ⚠️  Gate similarity click↔like = 0.000 (<0.1): tasks are nearly orthogonal — MTL may not be helping
+2026-08-03 21:46:02,193 | INFO    |   ⚠️  Gate similarity follow↔like = 0.017 (<0.1): tasks are nearly orthogonal — MTL may not be helping
+2026-08-03 21:46:03,306 | INFO    |   Heatmaps saved to ./runs\20260803_213944\diagnostics_step1000_heatmaps.png
+2026-08-03 21:46:04,293 | INFO    |   Gate distribution plot saved to ./runs\20260803_213944\diagnostics_step1000_gate_dist.png
+2026-08-03 21:46:04,293 | INFO    |   Markdown report saved to ./runs\20260803_213944\diagnostics_step1000_report.md
+2026-08-03 21:46:04,297 | INFO    | ============================================================
+2026-08-03 21:46:04,299 | INFO    | FINAL: Test evaluation
+2026-08-03 21:46:04,299 | INFO    | ============================================================
+2026-08-03 21:46:04,590 | INFO    | Loaded best model (step 1000, val_auc=0.5499)
+2026-08-03 21:46:10,021 | INFO    |   click     loss: 0.5733  |  AUC: 0.5993
+2026-08-03 21:46:10,021 | INFO    |   follow    loss: 0.0120  |  AUC: 0.5162
+2026-08-03 21:46:10,021 | INFO    |   like      loss: 0.0685  |  AUC: 0.5910
+2026-08-03 21:46:10,021 | INFO    |   share     loss: 0.0116  |  AUC: 0.5669
+2026-08-03 21:46:10,021 | INFO    |   mean      AUC: 0.5684
+2026-08-03 21:46:10,021 | INFO    | Done. Total time: 0:06:18
+2026-08-03 21:46:10,028 | INFO    |   --- Final diagnostics (test set) ---
+2026-08-03 21:47:25,167 | INFO    |   Diagnostics saved to ./runs\20260803_213944\diagnostics_step1000.json
+2026-08-03 21:47:25,169 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 21:47:25,169 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0015) | like=0.0015, share=0.0015, follow=0.0015
+2026-08-03 21:47:25,169 | INFO    |     Expert 1: strongest task=share (grad_norm=0.0005) | share=0.0005, like=0.0005, follow=0.0000
+2026-08-03 21:47:25,169 | INFO    |     Expert 2: strongest task=share (grad_norm=0.0002) | share=0.0002, like=0.0002, follow=0.0000
+2026-08-03 21:47:25,173 | INFO    |     Expert 3: strongest task=share (grad_norm=0.0020) | share=0.0020, like=0.0020, follow=0.0020
+2026-08-03 21:47:25,173 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 21:47:25,173 | INFO    |     click: click=1.000, follow=1.000, like=0.000, share=0.520
+2026-08-03 21:47:25,173 | INFO    |     follow: click=1.000, follow=1.000, like=0.017, share=0.536
+2026-08-03 21:47:25,173 | INFO    |     like: click=0.000, follow=0.017, like=1.000, share=0.508
+2026-08-03 21:47:25,173 | INFO    |     share: click=0.520, follow=0.536, like=0.508, share=1.000
+2026-08-03 21:47:25,173 | INFO    |   === Gate Entropy ===
+2026-08-03 21:47:25,174 | INFO    |     click: 0.6941
+2026-08-03 21:47:25,174 | INFO    |     follow: 0.7657
+2026-08-03 21:47:25,174 | INFO    |     like: 0.6937
+2026-08-03 21:47:25,174 | INFO    |     share: 0.7623
+2026-08-03 21:47:25,174 | INFO    |   ⚠️  Gate similarity click↔follow = 1.000 (>0.9): gates are nearly identical — tasks may not need separate gates
+2026-08-03 21:47:25,174 | INFO    |   ⚠️  Gate similarity click↔like = 0.000 (<0.1): tasks are nearly orthogonal — MTL may not be helping
+2026-08-03 21:47:25,174 | INFO    |   ⚠️  Gate similarity follow↔like = 0.017 (<0.1): tasks are nearly orthogonal — MTL may not be helping
+2026-08-03 21:47:27,081 | INFO    |   Heatmaps saved to ./runs\20260803_213944\diagnostics_step1000_heatmaps.png
+2026-08-03 21:47:27,694 | INFO    |   Gate distribution plot saved to ./runs\20260803_213944\diagnostics_step1000_gate_dist.png
+2026-08-03 21:47:27,694 | INFO    |   Markdown report saved to ./runs\20260803_213944\diagnostics_step1000_report.md
+2026-08-03 21:47:28,828 | INFO    | Training complete. Run directory: ./runs\20260803_213944
+2026-08-03 21:48:30,900 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:48:30,906 | INFO    | Using device: cpu
+2026-08-03 21:48:30,911 | INFO    | Run directory: ./runs\20260803_214830
+2026-08-03 21:48:30,914 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 21:48:30,914 | INFO    | Verifying cache integrity …
+2026-08-03 21:48:30,916 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 21:48:30,919 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 21:48:30,921 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 21:48:30,922 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 21:48:30,949 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 21:48:30,949 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 21:48:30,951 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 21:48:30,951 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 21:48:30,951 | INFO    | Tasks: ['click', 'follow']  |  Experts: 4
+2026-08-03 21:48:31,282 | INFO    | Params — total: 30930962  |  trainable: 30930962
+2026-08-03 21:48:33,972 | INFO    | ============================================================
+2026-08-03 21:48:33,972 | INFO    | STARTING TRAINING
+2026-08-03 21:48:33,972 | INFO    | ============================================================
+2026-08-03 21:49:06,069 | INFO    | Step    100 | loss: 0.8808 | click=0.6133  follow=0.2537
+2026-08-03 21:49:33,134 | INFO    | Step    200 | loss: 0.6795 | click=0.6016  follow=0.0684
+2026-08-03 21:49:36,942 | INFO    | === Step    200 | val_loss: 0.6363 | mean_auc: 0.5137 | click=0.5218  follow=0.5056
+2026-08-03 21:49:37,658 | INFO    |   → New best model saved (AUC=0.5137) at ./checkpoints\best_model.pt
+2026-08-03 21:50:29,064 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:50:29,072 | INFO    | Using device: cpu
+2026-08-03 21:50:29,077 | INFO    | Run directory: ./runs\20260803_215029
+2026-08-03 21:50:29,078 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 21:50:29,078 | INFO    | Verifying cache integrity …
+2026-08-03 21:50:29,080 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 21:50:29,082 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 21:50:29,083 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 21:50:29,083 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 21:50:29,107 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 21:50:29,107 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 21:50:29,108 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 21:50:29,109 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 21:50:29,109 | INFO    | Tasks: ['click', 'follow']  |  Experts: 4
+2026-08-03 21:50:29,438 | INFO    | Params — total: 30930962  |  trainable: 30930962
+2026-08-03 21:50:32,100 | INFO    | ============================================================
+2026-08-03 21:50:32,100 | INFO    | STARTING TRAINING
+2026-08-03 21:50:32,100 | INFO    | ============================================================
+2026-08-03 21:51:07,825 | INFO    | Step    100 | loss: 0.8808 | click=0.6133  follow=0.2537
+2026-08-03 21:51:38,153 | INFO    | Step    200 | loss: 0.6795 | click=0.6016  follow=0.0684
+2026-08-03 21:51:42,737 | INFO    | === Step    200 | val_loss: 0.6363 | mean_auc: 0.5137 | click=0.5218  follow=0.5056
+2026-08-03 21:51:43,420 | INFO    |   → New best model saved (AUC=0.5137) at ./checkpoints\best_model.pt
+2026-08-03 21:52:14,525 | INFO    | Step    300 | loss: 0.5966 | click=0.5598  follow=0.0305
+2026-08-03 21:52:49,162 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:55:15,972 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 21:55:15,981 | INFO    | Using device: cpu
+2026-08-03 21:55:16,003 | INFO    | Run directory: ./runs\20260803_215515
+2026-08-03 21:55:16,003 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 21:55:16,003 | INFO    | Verifying cache integrity …
+2026-08-03 21:55:16,006 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 21:55:16,006 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 21:55:16,006 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 21:55:16,013 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 21:55:16,030 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 21:55:16,030 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 21:55:16,039 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 21:55:16,040 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 21:55:16,040 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 21:55:17,026 | INFO    | Params — total: 61556290  |  trainable: 61556290
+2026-08-03 21:55:19,817 | INFO    | ============================================================
+2026-08-03 21:55:19,817 | INFO    | STARTING TRAINING
+2026-08-03 21:55:19,817 | INFO    | ============================================================
+2026-08-03 21:57:36,083 | INFO    | Step    200 | loss: 0.8350 | click=0.6097  like=0.2131
+2026-08-03 21:57:40,015 | INFO    | === Step    200 | val_loss: 0.6840 | mean_auc: 0.5255 | click=0.5317  like=0.5194
+2026-08-03 21:57:41,216 | INFO    |   → New best model saved (AUC=0.5255) at ./checkpoints\best_model.pt
+2026-08-03 21:59:40,174 | INFO    | Step    400 | loss: 0.6817 | click=0.5615  like=0.1143
+2026-08-03 21:59:44,170 | INFO    | === Step    400 | val_loss: 0.6697 | mean_auc: 0.5291 | click=0.5533  like=0.5048
+2026-08-03 21:59:45,476 | INFO    |   → New best model saved (AUC=0.5291) at ./checkpoints\best_model.pt
+2026-08-03 22:01:45,121 | INFO    | Step    600 | loss: 0.6599 | click=0.5487  like=0.1074
+2026-08-03 22:01:50,078 | INFO    | === Step    600 | val_loss: 0.6645 | mean_auc: 0.5708 | click=0.5827  like=0.5589
+2026-08-03 22:01:51,508 | INFO    |   → New best model saved (AUC=0.5708) at ./checkpoints\best_model.pt
+2026-08-03 22:04:07,913 | INFO    | Step    800 | loss: 0.6593 | click=0.5396  like=0.1168
+2026-08-03 22:04:12,179 | INFO    | === Step    800 | val_loss: 0.6584 | mean_auc: 0.5787 | click=0.6005  like=0.5569
+2026-08-03 22:04:13,454 | INFO    |   → New best model saved (AUC=0.5787) at ./checkpoints\best_model.pt
+2026-08-03 22:06:14,435 | INFO    | Step   1000 | loss: 0.6327 | click=0.5384  like=0.0920
+2026-08-03 22:06:18,415 | INFO    | === Step   1000 | val_loss: 0.6545 | mean_auc: 0.5931 | click=0.6179  like=0.5682
+2026-08-03 22:06:19,681 | INFO    |   → New best model saved (AUC=0.5931) at ./checkpoints\best_model.pt
+2026-08-03 22:06:19,684 | INFO    |   --- Running diagnostics ---
+2026-08-03 22:07:37,672 | INFO    |   Diagnostics saved to ./runs\20260803_215515\diagnostics_step1000.json
+2026-08-03 22:07:37,673 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 22:07:37,674 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0004) | like=0.0004, click=0.0000
+2026-08-03 22:07:37,674 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0018) | like=0.0018, click=0.0018
+2026-08-03 22:07:37,674 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0014) | like=0.0014, click=0.0013
+2026-08-03 22:07:37,676 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0001) | like=0.0001, click=0.0001
+2026-08-03 22:07:37,676 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 22:07:37,676 | INFO    |     click: click=1.000, like=0.499
+2026-08-03 22:07:37,678 | INFO    |     like: click=0.499, like=1.000
+2026-08-03 22:07:37,678 | INFO    |   === Gate Entropy ===
+2026-08-03 22:07:37,680 | INFO    |     click: 0.6526
+2026-08-03 22:07:37,680 | INFO    |     like: 1.0389
+2026-08-03 22:07:38,534 | INFO    |   Heatmaps saved to ./runs\20260803_215515\diagnostics_step1000_heatmaps.png
+2026-08-03 22:07:39,002 | INFO    |   Gate distribution plot saved to ./runs\20260803_215515\diagnostics_step1000_gate_dist.png
+2026-08-03 22:07:39,008 | INFO    |   Markdown report saved to ./runs\20260803_215515\diagnostics_step1000_report.md
+2026-08-03 22:07:39,011 | INFO    | ============================================================
+2026-08-03 22:07:39,011 | INFO    | FINAL: Test evaluation
+2026-08-03 22:07:39,012 | INFO    | ============================================================
+2026-08-03 22:07:39,482 | INFO    | Loaded best model (step 1000, val_auc=0.5931)
+2026-08-03 22:07:44,594 | INFO    |   click     loss: 0.5673  |  AUC: 0.6198
+2026-08-03 22:07:44,596 | INFO    |   like      loss: 0.0689  |  AUC: 0.5759
+2026-08-03 22:07:44,596 | INFO    |   mean      AUC: 0.5979
+2026-08-03 22:07:44,596 | INFO    | Done. Total time: 0:12:21
+2026-08-03 22:07:44,596 | INFO    |   --- Final diagnostics (test set) ---
+2026-08-03 22:09:11,323 | INFO    |   Diagnostics saved to ./runs\20260803_215515\diagnostics_step1000.json
+2026-08-03 22:09:11,324 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 22:09:11,324 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0003) | like=0.0003, click=0.0000
+2026-08-03 22:09:11,325 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0018) | like=0.0018, click=0.0018
+2026-08-03 22:09:11,326 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0014) | like=0.0014, click=0.0013
+2026-08-03 22:09:11,327 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0001) | like=0.0001, click=0.0001
+2026-08-03 22:09:11,327 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 22:09:11,328 | INFO    |     click: click=1.000, like=0.508
+2026-08-03 22:09:11,330 | INFO    |     like: click=0.508, like=1.000
+2026-08-03 22:09:11,331 | INFO    |   === Gate Entropy ===
+2026-08-03 22:09:11,331 | INFO    |     click: 0.6548
+2026-08-03 22:09:11,331 | INFO    |     like: 1.0395
+2026-08-03 22:09:11,998 | INFO    |   Heatmaps saved to ./runs\20260803_215515\diagnostics_step1000_heatmaps.png
+2026-08-03 22:09:12,318 | INFO    |   Gate distribution plot saved to ./runs\20260803_215515\diagnostics_step1000_gate_dist.png
+2026-08-03 22:09:12,321 | INFO    |   Markdown report saved to ./runs\20260803_215515\diagnostics_step1000_report.md
+2026-08-03 22:09:13,366 | INFO    | Training complete. Run directory: ./runs\20260803_215515
+2026-08-03 22:13:11,540 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:14:07,165 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:14:44,807 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:14:44,815 | INFO    | Using device: cpu
+2026-08-03 22:14:44,839 | INFO    | Run directory: ./runs\20260803_221444
+2026-08-03 22:14:44,839 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 22:14:44,840 | INFO    | Verifying cache integrity …
+2026-08-03 22:14:44,846 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 22:14:44,851 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 22:14:44,856 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 22:14:44,857 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 22:14:44,902 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 22:14:44,903 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 22:14:44,904 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 22:14:44,905 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 22:14:44,906 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 22:14:45,585 | INFO    | Params — total: 61573058  |  trainable: 61573058
+2026-08-03 22:14:48,831 | INFO    | ============================================================
+2026-08-03 22:14:48,831 | INFO    | STARTING TRAINING
+2026-08-03 22:14:48,831 | INFO    | ============================================================
+2026-08-03 22:15:15,943 | INFO    | Step    200 | loss: nan | click=nan  like=nan
+2026-08-03 22:17:36,148 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:18:18,644 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:18:18,644 | INFO    | Using device: cpu
+2026-08-03 22:18:18,657 | INFO    | Run directory: ./runs\20260803_221818
+2026-08-03 22:18:18,659 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 22:18:18,659 | INFO    | Verifying cache integrity …
+2026-08-03 22:18:18,662 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 22:18:18,664 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 22:18:18,666 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 22:18:18,667 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 22:18:18,691 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 22:18:18,692 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 22:18:18,694 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 22:18:18,695 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 22:18:18,695 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 22:18:19,381 | INFO    | Params — total: 61573058  |  trainable: 61573058
+2026-08-03 22:18:22,071 | INFO    | ============================================================
+2026-08-03 22:18:22,071 | INFO    | STARTING TRAINING
+2026-08-03 22:18:22,071 | INFO    | ============================================================
+2026-08-03 22:18:45,757 | INFO    | Step    200 | loss: nan | click=nan  like=nan
+2026-08-03 22:18:50,791 | WARNING |   AUC click: non-finite predictions (204800/204800 NaN/Inf) → nan
+2026-08-03 22:18:50,796 | WARNING |   AUC like: non-finite predictions (204800/204800 NaN/Inf) → nan
+2026-08-03 22:18:50,798 | INFO    | === Step    200 | val_loss: nan | mean_auc: nan | click=nan  like=nan
+2026-08-03 22:18:50,801 | INFO    |   → No improvement (1/10 checks)
+2026-08-03 22:19:13,230 | INFO    | Step    400 | loss: nan | click=nan  like=nan
+2026-08-03 22:19:20,947 | WARNING |   AUC click: non-finite predictions (204800/204800 NaN/Inf) → nan
+2026-08-03 22:19:20,955 | WARNING |   AUC like: non-finite predictions (204800/204800 NaN/Inf) → nan
+2026-08-03 22:19:20,957 | INFO    | === Step    400 | val_loss: nan | mean_auc: nan | click=nan  like=nan
+2026-08-03 22:19:20,958 | INFO    |   → No improvement (2/10 checks)
+2026-08-03 22:21:39,174 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:22:49,623 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:23:16,584 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:24:14,223 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:26:34,396 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:29:13,543 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:29:36,130 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:29:36,149 | INFO    | Using device: cpu
+2026-08-03 22:29:36,174 | INFO    | Run directory: ./runs\20260803_222936
+2026-08-03 22:29:36,179 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 22:29:36,181 | INFO    | Verifying cache integrity …
+2026-08-03 22:29:36,204 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 22:29:36,214 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 22:29:36,220 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 22:29:36,222 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 22:29:36,280 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 22:29:36,282 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 22:29:36,284 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 22:29:36,286 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 22:29:36,288 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 22:29:39,007 | INFO    | Params — total: 122823714  |  trainable: 122823714
+2026-08-03 22:29:46,743 | INFO    | ============================================================
+2026-08-03 22:29:46,743 | INFO    | STARTING TRAINING
+2026-08-03 22:29:46,745 | INFO    | ============================================================
+2026-08-03 22:31:35,291 | INFO    | Step    200 | loss: 0.8883 | click=0.6049  like=0.2711
+2026-08-03 22:31:53,222 | INFO    | === Step    200 | val_loss: 0.7356 | mean_auc: 0.5148 | click=0.5110  like=0.5186
+2026-08-03 22:31:57,511 | INFO    |   → New best model saved (AUC=0.5148) at ./checkpoints\best_model.pt
+2026-08-03 22:33:01,744 | INFO    | Step    400 | loss: 0.6969 | click=0.5691  like=0.1218
+2026-08-03 22:33:07,903 | INFO    | === Step    400 | val_loss: 0.6823 | mean_auc: 0.4818 | click=0.4966  like=0.4670
+2026-08-03 22:33:07,904 | INFO    |   → No improvement (1/10 checks)
+2026-08-03 22:33:45,317 | INFO    | Step    600 | loss: 0.6726 | click=0.5588  like=0.1104
+2026-08-03 22:33:52,428 | INFO    | === Step    600 | val_loss: 0.6773 | mean_auc: 0.4708 | click=0.4959  like=0.4457
+2026-08-03 22:33:52,428 | INFO    |   → No improvement (2/10 checks)
+2026-08-03 22:34:04,399 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:34:26,735 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:34:30,576 | INFO    | Step    800 | loss: 0.6715 | click=0.5512  like=0.1179
+2026-08-03 22:34:37,110 | INFO    | === Step    800 | val_loss: 0.6810 | mean_auc: 0.4688 | click=0.4924  like=0.4453
+2026-08-03 22:34:37,110 | INFO    |   → No improvement (3/10 checks)
+2026-08-03 22:34:49,797 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:34:49,810 | INFO    | Using device: cpu
+2026-08-03 22:34:49,817 | INFO    | Run directory: ./runs\20260803_223449
+2026-08-03 22:34:49,817 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 22:34:49,817 | INFO    | Verifying cache integrity …
+2026-08-03 22:34:49,823 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 22:34:49,835 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 22:34:49,844 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 22:34:49,845 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 22:34:49,928 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 22:34:49,929 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 22:34:49,929 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 22:34:49,929 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 22:34:49,929 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 22:34:52,305 | INFO    | Params — total: 122823714  |  trainable: 122823714
+2026-08-03 22:34:58,953 | INFO    | ============================================================
+2026-08-03 22:34:58,955 | INFO    | STARTING TRAINING
+2026-08-03 22:34:58,957 | INFO    | ============================================================
+2026-08-03 22:35:37,625 | INFO    | Step   1000 | loss: 0.6509 | click=0.5549  like=0.0940
+2026-08-03 22:35:50,242 | INFO    | Step    100 | loss: 1.0018 | click=0.6020  like=0.3856
+2026-08-03 22:35:54,095 | INFO    | === Step   1000 | val_loss: 0.6790 | mean_auc: 0.5001 | click=0.4990  like=0.5012
+2026-08-03 22:35:54,097 | INFO    |   → No improvement (4/10 checks)
+2026-08-03 22:35:54,098 | INFO    |   --- Running diagnostics ---
+2026-08-03 22:36:18,410 | INFO    | Step    200 | loss: 0.7748 | click=0.6079  like=0.1565
+2026-08-03 22:36:20,021 | INFO    | === Step    200 | val_loss: 0.7366 | mean_auc: 0.5768 | click=0.4707  like=0.6828
+2026-08-03 22:36:22,491 | INFO    |   → New best model saved (AUC=0.5768) at ./checkpoints\best_model.pt
+2026-08-03 22:36:44,066 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:36:44,077 | INFO    | Using device: cpu
+2026-08-03 22:36:44,086 | INFO    | Run directory: ./runs\20260803_223644
+2026-08-03 22:36:44,087 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 22:36:44,088 | INFO    | Verifying cache integrity …
+2026-08-03 22:36:44,091 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 22:36:44,095 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 22:36:44,099 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 22:36:44,100 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 22:36:44,135 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 22:36:44,136 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 22:36:44,138 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 22:36:44,139 | INFO    | Effective batch size: 512 × 1 = 512
+2026-08-03 22:36:44,140 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 22:36:44,582 | INFO    | Step    300 | loss: 0.7214 | click=0.5667  like=0.1477
+2026-08-03 22:36:46,825 | INFO    | Params — total: 122806946  |  trainable: 122806946
+2026-08-03 22:36:53,352 | INFO    | ============================================================
+2026-08-03 22:36:53,352 | INFO    | STARTING TRAINING
+2026-08-03 22:36:53,352 | INFO    | ============================================================
+2026-08-03 22:37:24,808 | INFO    | Step    400 | loss: 0.6723 | click=0.5715  like=0.0959
+2026-08-03 22:37:29,403 | INFO    | === Step    400 | val_loss: 0.6776 | mean_auc: 0.4932 | click=0.4918  like=0.4947
+2026-08-03 22:37:29,403 | INFO    |   → No improvement (1/10 checks)
+2026-08-03 22:37:29,405 | INFO    | ============================================================
+2026-08-03 22:37:29,405 | INFO    | FINAL: Test evaluation
+2026-08-03 22:37:29,405 | INFO    | ============================================================
+2026-08-03 22:37:32,332 | INFO    | Loaded best model (step 200, val_auc=0.5768)
+2026-08-03 22:37:36,938 | INFO    |   click     loss: 0.6125  |  AUC: 0.4925
+2026-08-03 22:37:36,938 | INFO    |   like      loss: 0.1602  |  AUC: 0.5074
+2026-08-03 22:37:36,938 | INFO    |   mean      AUC: 0.4999
+2026-08-03 22:37:36,938 | INFO    | Done. Total time: 0:02:30
+2026-08-03 22:37:36,940 | INFO    |   --- Final diagnostics (test set) ---
+2026-08-03 22:38:20,816 | INFO    | Step    200 | loss: 0.9989 | click=0.5894  like=0.3977
+2026-08-03 22:38:34,105 | INFO    | === Step    200 | val_loss: 0.7415 | mean_auc: 0.5176 | click=0.5327  like=0.5025
+2026-08-03 22:38:38,066 | INFO    |   → New best model saved (AUC=0.5176) at ./checkpoints\best_model.pt
+2026-08-03 22:38:45,894 | INFO    |   Diagnostics saved to ./runs\20260803_223449\diagnostics_step400.json
+2026-08-03 22:38:45,895 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 22:38:45,896 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0014) | like=0.0014, click=0.0013
+2026-08-03 22:38:45,896 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0006) | like=0.0006, click=0.0004
+2026-08-03 22:38:45,896 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0022) | like=0.0022, click=0.0022
+2026-08-03 22:38:45,898 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0043) | like=0.0043, click=0.0038
+2026-08-03 22:38:45,898 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 22:38:45,900 | INFO    |     click: click=1.000, like=0.942
+2026-08-03 22:38:45,900 | INFO    |     like: click=0.942, like=1.000
+2026-08-03 22:38:45,900 | INFO    |   === Gate Entropy ===
+2026-08-03 22:38:45,902 | INFO    |     click: 0.9927
+2026-08-03 22:38:45,903 | INFO    |     like: 0.5918
+2026-08-03 22:38:45,903 | INFO    |   ⚠️  Gate similarity click↔like = 0.942 (>0.9): gates are nearly identical — tasks may not need separate gates
+2026-08-03 22:38:47,492 | INFO    |   Heatmaps saved to ./runs\20260803_223449\diagnostics_step400_heatmaps.png
+2026-08-03 22:38:52,320 | INFO    |   Gate distribution plot saved to ./runs\20260803_223449\diagnostics_step400_gate_dist.png
+2026-08-03 22:38:52,324 | INFO    |   Markdown report saved to ./runs\20260803_223449\diagnostics_step400_report.md
+2026-08-03 22:38:54,581 | INFO    | Training complete. Run directory: ./runs\20260803_223449
+2026-08-03 22:39:25,684 | INFO    | Step    400 | loss: 0.6962 | click=0.5563  like=0.1322
+2026-08-03 22:39:30,816 | INFO    | === Step    400 | val_loss: 0.6816 | mean_auc: 0.5241 | click=0.5395  like=0.5087
+2026-08-03 22:39:33,462 | INFO    |   → New best model saved (AUC=0.5241) at ./checkpoints\best_model.pt
+2026-08-03 22:40:07,510 | INFO    | Step    600 | loss: 0.6636 | click=0.5476  like=0.1107
+2026-08-03 22:40:11,426 | INFO    | === Step    600 | val_loss: 0.6716 | mean_auc: 0.5507 | click=0.5624  like=0.5390
+2026-08-03 22:40:14,008 | INFO    |   → New best model saved (AUC=0.5507) at ./checkpoints\best_model.pt
+2026-08-03 22:40:48,837 | INFO    | Step    800 | loss: 0.6610 | click=0.5395  like=0.1174
+2026-08-03 22:40:52,823 | INFO    | === Step    800 | val_loss: 0.6628 | mean_auc: 0.5441 | click=0.5816  like=0.5067
+2026-08-03 22:40:52,823 | INFO    |   → No improvement (1/10 checks)
+2026-08-03 22:41:29,787 | INFO    | Step   1000 | loss: 0.6366 | click=0.5394  like=0.0939
+2026-08-03 22:41:35,608 | INFO    | === Step   1000 | val_loss: 0.6617 | mean_auc: 0.5720 | click=0.5956  like=0.5485
+2026-08-03 22:41:38,363 | INFO    |   → New best model saved (AUC=0.5720) at ./checkpoints\best_model.pt
+2026-08-03 22:41:38,363 | INFO    |   --- Running diagnostics ---
+2026-08-03 22:42:00,783 | INFO    |   Diagnostics saved to ./runs\20260803_223644\diagnostics_step1000.json
+2026-08-03 22:42:00,784 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 22:42:00,784 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0002) | like=0.0002, click=0.0002
+2026-08-03 22:42:00,784 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0010) | like=0.0010, click=0.0010
+2026-08-03 22:42:00,784 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0006) | like=0.0006, click=0.0003
+2026-08-03 22:42:00,784 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0024) | like=0.0024, click=0.0023
+2026-08-03 22:42:00,784 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 22:42:00,784 | INFO    |     click: click=1.000, like=0.792
+2026-08-03 22:42:00,789 | INFO    |     like: click=0.792, like=1.000
+2026-08-03 22:42:00,789 | INFO    |   === Gate Entropy ===
+2026-08-03 22:42:00,789 | INFO    |     click: 0.6837
+2026-08-03 22:42:00,789 | INFO    |     like: 0.7618
+2026-08-03 22:42:01,769 | INFO    |   Heatmaps saved to ./runs\20260803_223644\diagnostics_step1000_heatmaps.png
+2026-08-03 22:42:02,545 | INFO    |   Gate distribution plot saved to ./runs\20260803_223644\diagnostics_step1000_gate_dist.png
+2026-08-03 22:42:02,550 | INFO    |   Markdown report saved to ./runs\20260803_223644\diagnostics_step1000_report.md
+2026-08-03 22:42:02,554 | INFO    | ============================================================
+2026-08-03 22:42:02,556 | INFO    | FINAL: Test evaluation
+2026-08-03 22:42:02,556 | INFO    | ============================================================
+2026-08-03 22:42:03,725 | INFO    | Loaded best model (step 1000, val_auc=0.5720)
+2026-08-03 22:42:09,960 | INFO    |   click     loss: 0.5733  |  AUC: 0.5959
+2026-08-03 22:42:09,962 | INFO    |   like      loss: 0.0695  |  AUC: 0.5604
+2026-08-03 22:42:09,962 | INFO    |   mean      AUC: 0.5782
+2026-08-03 22:42:09,962 | INFO    | Done. Total time: 0:05:09
+2026-08-03 22:42:09,964 | INFO    |   --- Final diagnostics (test set) ---
+2026-08-03 22:42:31,183 | INFO    |   Diagnostics saved to ./runs\20260803_223644\diagnostics_step1000.json
+2026-08-03 22:42:31,186 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 22:42:31,186 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0002) | like=0.0002, click=0.0002
+2026-08-03 22:42:31,188 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0010) | like=0.0010, click=0.0010
+2026-08-03 22:42:31,188 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0006) | like=0.0006, click=0.0003
+2026-08-03 22:42:31,188 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0023) | like=0.0023, click=0.0023
+2026-08-03 22:42:31,188 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 22:42:31,188 | INFO    |     click: click=1.000, like=0.786
+2026-08-03 22:42:31,192 | INFO    |     like: click=0.786, like=1.000
+2026-08-03 22:42:31,192 | INFO    |   === Gate Entropy ===
+2026-08-03 22:42:31,194 | INFO    |     click: 0.6823
+2026-08-03 22:42:31,194 | INFO    |     like: 0.7627
+2026-08-03 22:42:31,822 | INFO    |   Heatmaps saved to ./runs\20260803_223644\diagnostics_step1000_heatmaps.png
+2026-08-03 22:42:32,147 | INFO    |   Gate distribution plot saved to ./runs\20260803_223644\diagnostics_step1000_gate_dist.png
+2026-08-03 22:42:32,147 | INFO    |   Markdown report saved to ./runs\20260803_223644\diagnostics_step1000_report.md
+2026-08-03 22:42:33,302 | INFO    | Training complete. Run directory: ./runs\20260803_223644
+2026-08-03 22:43:18,657 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:43:18,666 | INFO    | Using device: cpu
+2026-08-03 22:43:18,676 | INFO    | Run directory: ./runs\20260803_224318
+2026-08-03 22:43:18,677 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 22:43:18,678 | INFO    | Verifying cache integrity …
+2026-08-03 22:43:18,683 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 22:43:18,688 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 22:43:18,693 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 22:43:18,694 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 22:43:18,734 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 22:43:18,734 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 22:43:18,742 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 22:43:18,743 | INFO    | Effective batch size: 1024 × 1 = 1024
+2026-08-03 22:43:18,743 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 22:43:20,096 | INFO    | Params — total: 122806946  |  trainable: 122806946
+2026-08-03 22:43:23,292 | INFO    | ============================================================
+2026-08-03 22:43:23,292 | INFO    | STARTING TRAINING
+2026-08-03 22:43:23,293 | INFO    | ============================================================
+2026-08-03 22:44:02,674 | INFO    | Step    200 | loss: 0.9452 | click=0.5742  like=0.3614
+2026-08-03 22:44:13,549 | INFO    | === Step    200 | val_loss: 0.6846 | mean_auc: 0.5486 | click=0.5511  like=0.5461
+2026-08-03 22:44:15,944 | INFO    |   → New best model saved (AUC=0.5486) at ./checkpoints\best_model.pt
+2026-08-03 22:44:55,284 | INFO    | Step    400 | loss: 0.6605 | click=0.5441  like=0.1137
+2026-08-03 22:45:07,814 | INFO    | === Step    400 | val_loss: 0.6503 | mean_auc: 0.5833 | click=0.5875  like=0.5790
+2026-08-03 22:45:10,757 | INFO    |   → New best model saved (AUC=0.5833) at ./checkpoints\best_model.pt
+2026-08-03 22:46:01,866 | INFO    | Step    600 | loss: 0.6499 | click=0.5405  like=0.1084
+2026-08-03 22:46:19,261 | INFO    | === Step    600 | val_loss: 0.6346 | mean_auc: 0.6165 | click=0.6122  like=0.6209
+2026-08-03 22:46:22,791 | INFO    |   → New best model saved (AUC=0.6165) at ./checkpoints\best_model.pt
+2026-08-03 22:47:06,357 | INFO    | Step    800 | loss: 0.6452 | click=0.5392  like=0.1054
+2026-08-03 22:47:18,836 | INFO    | === Step    800 | val_loss: 0.6270 | mean_auc: 0.6219 | click=0.6334  like=0.6105
+2026-08-03 22:47:21,959 | INFO    |   → New best model saved (AUC=0.6219) at ./checkpoints\best_model.pt
+2026-08-03 22:48:04,609 | INFO    | Step   1000 | loss: 0.6335 | click=0.5271  like=0.1059
+2026-08-03 22:48:17,910 | INFO    | === Step   1000 | val_loss: 0.6227 | mean_auc: 0.6725 | click=0.6469  like=0.6981
+2026-08-03 22:48:20,824 | INFO    |   → New best model saved (AUC=0.6725) at ./checkpoints\best_model.pt
+2026-08-03 22:48:20,824 | INFO    |   --- Running diagnostics ---
+2026-08-03 22:48:50,706 | INFO    |   Diagnostics saved to ./runs\20260803_224318\diagnostics_step1000.json
+2026-08-03 22:48:50,707 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 22:48:50,707 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0000) | like=0.0000, click=0.0000
+2026-08-03 22:48:50,707 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0010) | like=0.0010, click=0.0010
+2026-08-03 22:48:50,710 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0006) | like=0.0006, click=0.0000
+2026-08-03 22:48:50,710 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0009) | like=0.0009, click=0.0009
+2026-08-03 22:48:50,710 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 22:48:50,710 | INFO    |     click: click=1.000, like=0.007
+2026-08-03 22:48:50,713 | INFO    |     like: click=0.007, like=1.000
+2026-08-03 22:48:50,714 | INFO    |   === Gate Entropy ===
+2026-08-03 22:48:50,714 | INFO    |     click: 0.7035
+2026-08-03 22:48:50,714 | INFO    |     like: 0.0591
+2026-08-03 22:48:50,714 | INFO    |   ⚠️  Gate similarity click↔like = 0.007 (<0.1): tasks are nearly orthogonal — MTL may not be helping
+2026-08-03 22:48:51,369 | INFO    |   Heatmaps saved to ./runs\20260803_224318\diagnostics_step1000_heatmaps.png
+2026-08-03 22:48:51,753 | INFO    |   Gate distribution plot saved to ./runs\20260803_224318\diagnostics_step1000_gate_dist.png
+2026-08-03 22:48:51,753 | INFO    |   Markdown report saved to ./runs\20260803_224318\diagnostics_step1000_report.md
+2026-08-03 22:49:32,007 | INFO    | Step   1200 | loss: 0.6060 | click=0.5264  like=0.0792
+2026-08-03 22:49:44,023 | INFO    | === Step   1200 | val_loss: 0.6133 | mean_auc: 0.6984 | click=0.6612  like=0.7356
+2026-08-03 22:49:46,995 | INFO    |   → New best model saved (AUC=0.6984) at ./checkpoints\best_model.pt
+2026-08-03 22:50:29,480 | INFO    | Step   1400 | loss: 0.6071 | click=0.5236  like=0.0832
+2026-08-03 22:50:43,144 | INFO    | === Step   1400 | val_loss: 0.6114 | mean_auc: 0.7067 | click=0.6629  like=0.7505
+2026-08-03 22:50:46,179 | INFO    |   → New best model saved (AUC=0.7067) at ./checkpoints\best_model.pt
+2026-08-03 22:51:26,868 | INFO    | Step   1600 | loss: 0.5970 | click=0.5136  like=0.0832
+2026-08-03 22:51:40,384 | INFO    | === Step   1600 | val_loss: 0.6091 | mean_auc: 0.7129 | click=0.6735  like=0.7523
+2026-08-03 22:51:43,193 | INFO    |   → New best model saved (AUC=0.7129) at ./checkpoints\best_model.pt
+2026-08-03 22:51:43,196 | INFO    | ============================================================
+2026-08-03 22:51:43,196 | INFO    | FINAL: Test evaluation
+2026-08-03 22:51:43,196 | INFO    | ============================================================
+2026-08-03 22:51:44,227 | INFO    | Loaded best model (step 1600, val_auc=0.7129)
+2026-08-03 22:51:59,806 | INFO    |   click     loss: 0.5424  |  AUC: 0.6726
+2026-08-03 22:51:59,806 | INFO    |   like      loss: 0.0700  |  AUC: 0.7557
+2026-08-03 22:51:59,815 | INFO    |   mean      AUC: 0.7142
+2026-08-03 22:51:59,816 | INFO    | Done. Total time: 0:08:34
+2026-08-03 22:51:59,816 | INFO    |   --- Final diagnostics (test set) ---
+2026-08-03 22:52:31,357 | INFO    |   Diagnostics saved to ./runs\20260803_224318\diagnostics_step1600.json
+2026-08-03 22:52:31,363 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 22:52:31,364 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0000) | like=0.0000, click=0.0000
+2026-08-03 22:52:31,365 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0007) | like=0.0007, click=0.0007
+2026-08-03 22:52:31,365 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0005) | like=0.0005, click=0.0000
+2026-08-03 22:52:31,366 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0008) | like=0.0008, click=0.0008
+2026-08-03 22:52:31,366 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 22:52:31,367 | INFO    |     click: click=1.000, like=0.006
+2026-08-03 22:52:31,367 | INFO    |     like: click=0.006, like=1.000
+2026-08-03 22:52:31,368 | INFO    |   === Gate Entropy ===
+2026-08-03 22:52:31,369 | INFO    |     click: 0.6990
+2026-08-03 22:52:31,369 | INFO    |     like: 0.0532
+2026-08-03 22:52:31,371 | INFO    |   ⚠️  Gate similarity click↔like = 0.006 (<0.1): tasks are nearly orthogonal — MTL may not be helping
+2026-08-03 22:52:32,121 | INFO    |   Heatmaps saved to ./runs\20260803_224318\diagnostics_step1600_heatmaps.png
+2026-08-03 22:52:32,581 | INFO    |   Gate distribution plot saved to ./runs\20260803_224318\diagnostics_step1600_gate_dist.png
+2026-08-03 22:52:32,581 | INFO    |   Markdown report saved to ./runs\20260803_224318\diagnostics_step1600_report.md
+2026-08-03 22:52:33,931 | INFO    | Training complete. Run directory: ./runs\20260803_224318
+2026-08-03 22:53:34,085 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:53:34,424 | INFO    | Using device: privateuseone:0
+2026-08-03 22:53:34,425 | INFO    | Run directory: ./runs\20260803_225334
+2026-08-03 22:53:34,430 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 22:53:34,430 | INFO    | Verifying cache integrity …
+2026-08-03 22:53:34,433 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 22:53:34,435 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 22:53:34,438 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 22:53:34,438 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 22:53:34,464 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 22:53:34,464 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 22:53:34,464 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 22:53:34,466 | INFO    | Effective batch size: 4096 × 1 = 4096
+2026-08-03 22:53:34,466 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 22:53:36,405 | INFO    | Params — total: 122806946  |  trainable: 122806946
+2026-08-03 22:53:39,460 | INFO    | ============================================================
+2026-08-03 22:53:39,460 | INFO    | STARTING TRAINING
+2026-08-03 22:53:39,463 | INFO    | ============================================================
+2026-08-03 22:54:13,355 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 22:54:13,367 | INFO    | Using device: cpu
+2026-08-03 22:54:13,374 | INFO    | Run directory: ./runs\20260803_225413
+2026-08-03 22:54:13,377 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 22:54:13,379 | INFO    | Verifying cache integrity …
+2026-08-03 22:54:13,382 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 22:54:13,387 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 22:54:13,389 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 22:54:13,389 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 22:54:13,429 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 22:54:13,429 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 22:54:13,434 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 22:54:13,436 | INFO    | Effective batch size: 4096 × 1 = 4096
+2026-08-03 22:54:13,436 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 22:54:15,264 | INFO    | Params — total: 122806946  |  trainable: 122806946
+2026-08-03 22:54:18,936 | INFO    | ============================================================
+2026-08-03 22:54:18,936 | INFO    | STARTING TRAINING
+2026-08-03 22:54:18,936 | INFO    | ============================================================
+2026-08-03 22:55:36,140 | INFO    | Step    200 | loss: 0.8956 | click=0.5614  like=0.3248
+2026-08-03 22:56:19,658 | INFO    | === Step    200 | val_loss: 0.6672 | mean_auc: 0.5689 | click=0.5905  like=0.5474
+2026-08-03 22:56:22,733 | INFO    |   → New best model saved (AUC=0.5689) at ./checkpoints\best_model.pt
+2026-08-03 22:57:39,501 | INFO    | Step    400 | loss: 0.6437 | click=0.5336  like=0.1073
+2026-08-03 22:58:18,816 | INFO    | === Step    400 | val_loss: 0.6183 | mean_auc: 0.6245 | click=0.6502  like=0.5987
+2026-08-03 22:58:21,568 | INFO    |   → New best model saved (AUC=0.6245) at ./checkpoints\best_model.pt
+2026-08-03 22:59:24,677 | INFO    | Step    600 | loss: 0.6088 | click=0.5126  like=0.0955
+2026-08-03 23:00:01,776 | INFO    | === Step    600 | val_loss: 0.6026 | mean_auc: 0.6827 | click=0.6773  like=0.6881
+2026-08-03 23:00:04,544 | INFO    |   → New best model saved (AUC=0.6827) at ./checkpoints\best_model.pt
+2026-08-03 23:01:14,512 | INFO    | Step    800 | loss: 0.6060 | click=0.5115  like=0.0940
+2026-08-03 23:01:48,787 | INFO    | === Step    800 | val_loss: 0.5920 | mean_auc: 0.7170 | click=0.6912  like=0.7428
+2026-08-03 23:01:51,356 | INFO    |   → New best model saved (AUC=0.7170) at ./checkpoints\best_model.pt
+2026-08-03 23:02:53,347 | INFO    | Step   1000 | loss: 0.6047 | click=0.5074  like=0.0971
+2026-08-03 23:03:29,915 | INFO    | === Step   1000 | val_loss: 0.5860 | mean_auc: 0.7384 | click=0.7014  like=0.7754
+2026-08-03 23:03:32,578 | INFO    |   → New best model saved (AUC=0.7384) at ./checkpoints\best_model.pt
+2026-08-03 23:03:32,578 | INFO    |   --- Running diagnostics ---
+2026-08-03 23:05:02,864 | INFO    |   Diagnostics saved to ./runs\20260803_225413\diagnostics_step1000.json
+2026-08-03 23:05:02,864 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 23:05:02,864 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0002) | like=0.0002, click=0.0000
+2026-08-03 23:05:02,864 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0005) | like=0.0005, click=0.0005
+2026-08-03 23:05:02,864 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0002) | like=0.0002, click=0.0000
+2026-08-03 23:05:02,864 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0004) | like=0.0004, click=0.0004
+2026-08-03 23:05:02,864 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 23:05:02,864 | INFO    |     click: click=1.000, like=0.007
+2026-08-03 23:05:02,864 | INFO    |     like: click=0.007, like=1.000
+2026-08-03 23:05:02,864 | INFO    |   === Gate Entropy ===
+2026-08-03 23:05:02,864 | INFO    |     click: 0.7128
+2026-08-03 23:05:02,872 | INFO    |     like: 0.7134
+2026-08-03 23:05:02,872 | INFO    |   ⚠️  Gate similarity click↔like = 0.007 (<0.1): tasks are nearly orthogonal — MTL may not be helping
+2026-08-03 23:05:03,480 | INFO    |   Heatmaps saved to ./runs\20260803_225413\diagnostics_step1000_heatmaps.png
+2026-08-03 23:05:03,883 | INFO    |   Gate distribution plot saved to ./runs\20260803_225413\diagnostics_step1000_gate_dist.png
+2026-08-03 23:05:03,885 | INFO    |   Markdown report saved to ./runs\20260803_225413\diagnostics_step1000_report.md
+2026-08-03 23:06:06,506 | INFO    | Step   1200 | loss: 0.5894 | click=0.4994  like=0.0897
+2026-08-03 23:06:45,140 | INFO    | === Step   1200 | val_loss: 0.5810 | mean_auc: 0.7456 | click=0.7071  like=0.7841
+2026-08-03 23:06:48,026 | INFO    |   → New best model saved (AUC=0.7456) at ./checkpoints\best_model.pt
+2026-08-03 23:08:09,105 | INFO    | Step   1400 | loss: 0.5856 | click=0.4973  like=0.0882
+2026-08-03 23:08:54,129 | INFO    | === Step   1400 | val_loss: 0.5799 | mean_auc: 0.7523 | click=0.7114  like=0.7932
+2026-08-03 23:08:57,372 | INFO    |   → New best model saved (AUC=0.7523) at ./checkpoints\best_model.pt
+2026-08-03 23:10:22,343 | INFO    | Step   1600 | loss: 0.5910 | click=0.5010  like=0.0898
+2026-08-03 23:11:07,720 | INFO    | === Step   1600 | val_loss: 0.5774 | mean_auc: 0.7545 | click=0.7147  like=0.7944
+2026-08-03 23:11:10,774 | INFO    |   → New best model saved (AUC=0.7545) at ./checkpoints\best_model.pt
+2026-08-03 23:12:28,822 | INFO    | Step   1800 | loss: 0.5896 | click=0.4998  like=0.0897
+2026-08-03 23:13:04,948 | INFO    | === Step   1800 | val_loss: 0.5767 | mean_auc: 0.7570 | click=0.7176  like=0.7964
+2026-08-03 23:13:07,492 | INFO    |   → New best model saved (AUC=0.7570) at ./checkpoints\best_model.pt
+2026-08-03 23:14:17,156 | INFO    | Step   2000 | loss: 0.5798 | click=0.4963  like=0.0834
+2026-08-03 23:15:00,748 | INFO    | === Step   2000 | val_loss: 0.5744 | mean_auc: 0.7584 | click=0.7194  like=0.7974
+2026-08-03 23:15:03,439 | INFO    |   → New best model saved (AUC=0.7584) at ./checkpoints\best_model.pt
+2026-08-03 23:15:03,439 | INFO    |   --- Running diagnostics ---
+2026-08-03 23:16:33,332 | INFO    |   Diagnostics saved to ./runs\20260803_225413\diagnostics_step2000.json
+2026-08-03 23:16:33,332 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 23:16:33,346 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0001) | like=0.0001, click=0.0000
+2026-08-03 23:16:33,346 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0003) | like=0.0003, click=0.0003
+2026-08-03 23:16:33,346 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0001) | like=0.0001, click=0.0000
+2026-08-03 23:16:33,348 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0003) | like=0.0003, click=0.0003
+2026-08-03 23:16:33,348 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 23:16:33,348 | INFO    |     click: click=1.000, like=0.006
+2026-08-03 23:16:33,348 | INFO    |     like: click=0.006, like=1.000
+2026-08-03 23:16:33,348 | INFO    |   === Gate Entropy ===
+2026-08-03 23:16:33,348 | INFO    |     click: 0.7057
+2026-08-03 23:16:33,348 | INFO    |     like: 0.7124
+2026-08-03 23:16:33,348 | INFO    |   ⚠️  Gate similarity click↔like = 0.006 (<0.1): tasks are nearly orthogonal — MTL may not be helping
+2026-08-03 23:16:34,010 | INFO    |   Heatmaps saved to ./runs\20260803_225413\diagnostics_step2000_heatmaps.png
+2026-08-03 23:16:34,406 | INFO    |   Gate distribution plot saved to ./runs\20260803_225413\diagnostics_step2000_gate_dist.png
+2026-08-03 23:16:34,408 | INFO    |   Markdown report saved to ./runs\20260803_225413\diagnostics_step2000_report.md
+2026-08-03 23:16:34,410 | INFO    | ============================================================
+2026-08-03 23:16:34,410 | INFO    | FINAL: Test evaluation
+2026-08-03 23:16:34,410 | INFO    | ============================================================
+2026-08-03 23:16:35,131 | INFO    | Loaded best model (step 2000, val_auc=0.7584)
+2026-08-03 23:17:14,357 | INFO    |   click     loss: 0.5081  |  AUC: 0.7165
+2026-08-03 23:17:14,357 | INFO    |   like      loss: 0.0700  |  AUC: 0.7986
+2026-08-03 23:17:14,357 | INFO    |   mean      AUC: 0.7576
+2026-08-03 23:17:14,357 | INFO    | Done. Total time: 0:22:52
+2026-08-03 23:17:14,357 | INFO    |   --- Final diagnostics (test set) ---
+2026-08-03 23:18:46,467 | INFO    |   Diagnostics saved to ./runs\20260803_225413\diagnostics_step2000.json
+2026-08-03 23:18:46,469 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 23:18:46,469 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0001) | like=0.0001, click=0.0000
+2026-08-03 23:18:46,469 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0003) | like=0.0003, click=0.0003
+2026-08-03 23:18:46,469 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0001) | like=0.0001, click=0.0000
+2026-08-03 23:18:46,469 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0003) | like=0.0003, click=0.0003
+2026-08-03 23:18:46,469 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 23:18:46,469 | INFO    |     click: click=1.000, like=0.006
+2026-08-03 23:18:46,469 | INFO    |     like: click=0.006, like=1.000
+2026-08-03 23:18:46,469 | INFO    |   === Gate Entropy ===
+2026-08-03 23:18:46,469 | INFO    |     click: 0.7057
+2026-08-03 23:18:46,472 | INFO    |     like: 0.7121
+2026-08-03 23:18:46,472 | INFO    |   ⚠️  Gate similarity click↔like = 0.006 (<0.1): tasks are nearly orthogonal — MTL may not be helping
+2026-08-03 23:18:46,994 | INFO    |   Heatmaps saved to ./runs\20260803_225413\diagnostics_step2000_heatmaps.png
+2026-08-03 23:18:47,307 | INFO    |   Gate distribution plot saved to ./runs\20260803_225413\diagnostics_step2000_gate_dist.png
+2026-08-03 23:18:47,307 | INFO    |   Markdown report saved to ./runs\20260803_225413\diagnostics_step2000_report.md
+2026-08-03 23:18:49,369 | INFO    | Training complete. Run directory: ./runs\20260803_225413
+2026-08-03 23:19:41,686 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 23:19:41,695 | INFO    | Using device: cpu
+2026-08-03 23:19:41,703 | INFO    | Run directory: ./runs\20260803_231941
+2026-08-03 23:19:41,704 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 23:19:41,705 | INFO    | Verifying cache integrity …
+2026-08-03 23:19:41,711 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 23:19:41,715 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 23:19:41,718 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 23:19:41,718 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 23:19:41,763 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 23:19:41,764 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 23:19:41,764 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 23:19:41,765 | INFO    | Effective batch size: 4096 × 1 = 4096
+2026-08-03 23:19:41,765 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 23:19:43,107 | INFO    | Params — total: 122806946  |  trainable: 122806946
+2026-08-03 23:19:46,263 | INFO    | ============================================================
+2026-08-03 23:19:46,263 | INFO    | STARTING TRAINING
+2026-08-03 23:19:46,263 | INFO    | ============================================================
+2026-08-03 23:20:59,584 | INFO    | Step    200 | loss: 1.0559 | click=0.5623  like=0.4753
+2026-08-03 23:21:38,857 | INFO    | === Step    200 | val_loss: 0.7412 | mean_auc: 0.5735 | click=0.5815  like=0.5655
+2026-08-03 23:21:41,311 | INFO    |   → New best model saved (AUC=0.5735) at ./checkpoints\best_model.pt
+2026-08-03 23:22:51,579 | INFO    | Step    400 | loss: 0.7100 | click=0.5366  like=0.1645
+2026-08-03 23:23:28,446 | INFO    | === Step    400 | val_loss: 0.6678 | mean_auc: 0.6234 | click=0.6422  like=0.6046
+2026-08-03 23:23:30,853 | INFO    |   → New best model saved (AUC=0.6234) at ./checkpoints\best_model.pt
+2026-08-03 23:24:34,232 | INFO    | Step    600 | loss: 0.6617 | click=0.5151  like=0.1429
+2026-08-03 23:25:10,646 | INFO    | === Step    600 | val_loss: 0.6434 | mean_auc: 0.6743 | click=0.6736  like=0.6749
+2026-08-03 23:26:05,078 | INFO    | Logging to file: D:\OneDrive\python-code\Public\recommendations\tenrec\MTL\training.log
+2026-08-03 23:26:05,078 | INFO    | Using device: cpu
+2026-08-03 23:26:05,099 | INFO    | Run directory: ./runs\20260803_232605
+2026-08-03 23:26:05,099 | INFO    | Features — cat: ['item_id', 'video_category', 'gender'] | num: ['age_norm', 'watch_norm'] | hist: 10
+2026-08-03 23:26:05,100 | INFO    | Verifying cache integrity …
+2026-08-03 23:26:05,102 | INFO    |   ✅ Cache valid: 72161769 rows
+2026-08-03 23:26:05,104 | INFO    |   ✅ Cache valid: 24148450 rows
+2026-08-03 23:26:05,106 | INFO    |   ✅ Cache valid: 24032087 rows
+2026-08-03 23:26:05,107 | INFO    | ✅ All caches valid — skipping preprocessing
+2026-08-03 23:26:05,131 | INFO    | Train: 72161769  |  Val: 24148450  |  Test: 24032087
+2026-08-03 23:26:05,131 | WARNING | DataLoader workers disabled on this device — using num_workers=0
+2026-08-03 23:26:05,131 | INFO    | Vocab — item_id:1912866, video_category:3, gender:3
+2026-08-03 23:26:05,131 | INFO    | Effective batch size: 4096 × 2 = 8192
+2026-08-03 23:26:05,136 | INFO    | Tasks: ['click', 'like']  |  Experts: 4
+2026-08-03 23:26:06,476 | INFO    | Params — total: 122806946  |  trainable: 122806946
+2026-08-03 23:26:09,275 | INFO    | ============================================================
+2026-08-03 23:26:09,275 | INFO    | STARTING TRAINING
+2026-08-03 23:26:09,275 | INFO    | ============================================================
+2026-08-03 23:27:11,802 | INFO    | Step    200 | loss: 1.2495 | click=0.5684  like=0.6612
+2026-08-03 23:27:57,531 | INFO    | === Step    200 | val_loss: 0.8224 | mean_auc: 0.5337 | click=0.5610  like=0.5064
+2026-08-03 23:27:59,884 | INFO    |   → New best model saved (AUC=0.5337) at ./checkpoints\best_model.pt
+2026-08-03 23:29:02,129 | INFO    | Step    400 | loss: 0.7884 | click=0.5445  like=0.2308
+2026-08-03 23:29:43,141 | INFO    | === Step    400 | val_loss: 0.7194 | mean_auc: 0.6029 | click=0.6184  like=0.5874
+2026-08-03 23:29:45,609 | INFO    |   → New best model saved (AUC=0.6029) at ./checkpoints\best_model.pt
+2026-08-03 23:30:42,098 | INFO    | Step    600 | loss: 0.7064 | click=0.5243  like=0.1755
+2026-08-03 23:31:21,857 | INFO    | === Step    600 | val_loss: 0.6754 | mean_auc: 0.6337 | click=0.6580  like=0.6094
+2026-08-03 23:31:24,347 | INFO    |   → New best model saved (AUC=0.6337) at ./checkpoints\best_model.pt
+2026-08-03 23:32:23,330 | INFO    | Step    800 | loss: 0.6784 | click=0.5189  like=0.1564
+2026-08-03 23:33:02,898 | INFO    | === Step    800 | val_loss: 0.6483 | mean_auc: 0.6609 | click=0.6788  like=0.6430
+2026-08-03 23:33:05,381 | INFO    |   → New best model saved (AUC=0.6609) at ./checkpoints\best_model.pt
+2026-08-03 23:34:01,482 | INFO    | Step   1000 | loss: 0.6698 | click=0.5126  like=0.1557
+2026-08-03 23:34:41,976 | INFO    | === Step   1000 | val_loss: 0.6367 | mean_auc: 0.7027 | click=0.6921  like=0.7132
+2026-08-03 23:34:44,734 | INFO    |   → New best model saved (AUC=0.7027) at ./checkpoints\best_model.pt
+2026-08-03 23:34:44,735 | INFO    |   --- Running diagnostics ---
+2026-08-03 23:37:47,161 | INFO    |   Diagnostics saved to ./runs\20260803_232605\diagnostics_step1000.json
+2026-08-03 23:37:47,163 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 23:37:47,163 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0001) | like=0.0001, click=0.0000
+2026-08-03 23:37:47,164 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0009) | like=0.0009, click=0.0009
+2026-08-03 23:37:47,164 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0000) | like=0.0000, click=0.0000
+2026-08-03 23:37:47,165 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0004) | like=0.0004, click=0.0003
+2026-08-03 23:37:47,166 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 23:37:47,166 | INFO    |     click: click=1.000, like=0.174
+2026-08-03 23:37:47,167 | INFO    |     like: click=0.174, like=1.000
+2026-08-03 23:37:47,167 | INFO    |   === Gate Entropy ===
+2026-08-03 23:37:47,168 | INFO    |     click: 0.5071
+2026-08-03 23:37:47,168 | INFO    |     like: 0.7980
+2026-08-03 23:37:47,969 | INFO    |   Heatmaps saved to ./runs\20260803_232605\diagnostics_step1000_heatmaps.png
+2026-08-03 23:37:48,375 | INFO    |   Gate distribution plot saved to ./runs\20260803_232605\diagnostics_step1000_gate_dist.png
+2026-08-03 23:37:48,382 | INFO    |   Markdown report saved to ./runs\20260803_232605\diagnostics_step1000_report.md
+2026-08-03 23:38:41,835 | INFO    | Step   1200 | loss: 0.6464 | click=0.5042  like=0.1414
+2026-08-03 23:39:17,827 | INFO    | === Step   1200 | val_loss: 0.6260 | mean_auc: 0.7237 | click=0.7002  like=0.7471
+2026-08-03 23:39:20,435 | INFO    |   → New best model saved (AUC=0.7237) at ./checkpoints\best_model.pt
+2026-08-03 23:40:17,902 | INFO    | Step   1400 | loss: 0.6380 | click=0.5009  like=0.1369
+2026-08-03 23:40:56,075 | INFO    | === Step   1400 | val_loss: 0.6204 | mean_auc: 0.7395 | click=0.7051  like=0.7740
+2026-08-03 23:40:58,814 | INFO    |   → New best model saved (AUC=0.7395) at ./checkpoints\best_model.pt
+2026-08-03 23:41:54,271 | INFO    | Step   1600 | loss: 0.6424 | click=0.5045  like=0.1382
+2026-08-03 23:42:31,918 | INFO    | === Step   1600 | val_loss: 0.6161 | mean_auc: 0.7448 | click=0.7093  like=0.7803
+2026-08-03 23:42:34,452 | INFO    |   → New best model saved (AUC=0.7448) at ./checkpoints\best_model.pt
+2026-08-03 23:43:28,635 | INFO    | Step   1800 | loss: 0.6399 | click=0.5029  like=0.1375
+2026-08-03 23:44:03,453 | INFO    | === Step   1800 | val_loss: 0.6129 | mean_auc: 0.7496 | click=0.7136  like=0.7856
+2026-08-03 23:44:06,085 | INFO    |   → New best model saved (AUC=0.7496) at ./checkpoints\best_model.pt
+2026-08-03 23:44:57,631 | INFO    | Step   2000 | loss: 0.6263 | click=0.4991  like=0.1280
+2026-08-03 23:45:32,439 | INFO    | === Step   2000 | val_loss: 0.6088 | mean_auc: 0.7526 | click=0.7158  like=0.7894
+2026-08-03 23:45:35,024 | INFO    |   → New best model saved (AUC=0.7526) at ./checkpoints\best_model.pt
+2026-08-03 23:45:35,024 | INFO    |   --- Running diagnostics ---
+2026-08-03 23:48:22,640 | INFO    |   Diagnostics saved to ./runs\20260803_232605\diagnostics_step2000.json
+2026-08-03 23:48:22,642 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 23:48:22,642 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0001) | like=0.0001, click=0.0000
+2026-08-03 23:48:22,642 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0006) | like=0.0006, click=0.0006
+2026-08-03 23:48:22,642 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0000) | like=0.0000, click=0.0000
+2026-08-03 23:48:22,644 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0004) | like=0.0004, click=0.0003
+2026-08-03 23:48:22,644 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 23:48:22,644 | INFO    |     click: click=1.000, like=0.172
+2026-08-03 23:48:22,644 | INFO    |     like: click=0.172, like=1.000
+2026-08-03 23:48:22,644 | INFO    |   === Gate Entropy ===
+2026-08-03 23:48:22,646 | INFO    |     click: 0.4910
+2026-08-03 23:48:22,646 | INFO    |     like: 0.7237
+2026-08-03 23:48:23,203 | INFO    |   Heatmaps saved to ./runs\20260803_232605\diagnostics_step2000_heatmaps.png
+2026-08-03 23:48:23,508 | INFO    |   Gate distribution plot saved to ./runs\20260803_232605\diagnostics_step2000_gate_dist.png
+2026-08-03 23:48:23,508 | INFO    |   Markdown report saved to ./runs\20260803_232605\diagnostics_step2000_report.md
+2026-08-03 23:48:23,508 | INFO    | ============================================================
+2026-08-03 23:48:23,508 | INFO    | FINAL: Test evaluation
+2026-08-03 23:48:23,508 | INFO    | ============================================================
+2026-08-03 23:48:24,177 | INFO    | Loaded best model (step 2000, val_auc=0.7526)
+2026-08-03 23:49:07,415 | INFO    |   click     loss: 0.5098  |  AUC: 0.7127
+2026-08-03 23:49:07,415 | INFO    |   like      loss: 0.1059  |  AUC: 0.7909
+2026-08-03 23:49:07,415 | INFO    |   mean      AUC: 0.7518
+2026-08-03 23:49:07,415 | INFO    | Done. Total time: 0:22:55
+2026-08-03 23:49:07,415 | INFO    |   --- Final diagnostics (test set) ---
+2026-08-03 23:52:14,168 | INFO    |   Diagnostics saved to ./runs\20260803_232605\diagnostics_step2000.json
+2026-08-03 23:52:14,169 | INFO    |   === Expert Task Affinity (gradient norms) ===
+2026-08-03 23:52:14,169 | INFO    |     Expert 0: strongest task=like (grad_norm=0.0001) | like=0.0001, click=0.0000
+2026-08-03 23:52:14,169 | INFO    |     Expert 1: strongest task=like (grad_norm=0.0006) | like=0.0006, click=0.0006
+2026-08-03 23:52:14,171 | INFO    |     Expert 2: strongest task=like (grad_norm=0.0000) | like=0.0000, click=0.0000
+2026-08-03 23:52:14,172 | INFO    |     Expert 3: strongest task=like (grad_norm=0.0004) | like=0.0004, click=0.0003
+2026-08-03 23:52:14,172 | INFO    |   === Gate Cosine Similarity ===
+2026-08-03 23:52:14,173 | INFO    |     click: click=1.000, like=0.172
+2026-08-03 23:52:14,173 | INFO    |     like: click=0.172, like=1.000
+2026-08-03 23:52:14,174 | INFO    |   === Gate Entropy ===
+2026-08-03 23:52:14,174 | INFO    |     click: 0.4906
+2026-08-03 23:52:14,175 | INFO    |     like: 0.7233
+2026-08-03 23:52:14,763 | INFO    |   Heatmaps saved to ./runs\20260803_232605\diagnostics_step2000_heatmaps.png
+2026-08-03 23:52:15,071 | INFO    |   Gate distribution plot saved to ./runs\20260803_232605\diagnostics_step2000_gate_dist.png
+2026-08-03 23:52:15,073 | INFO    |   Markdown report saved to ./runs\20260803_232605\diagnostics_step2000_report.md
+2026-08-03 23:52:17,001 | INFO    | Training complete. Run directory: ./runs\20260803_232605
