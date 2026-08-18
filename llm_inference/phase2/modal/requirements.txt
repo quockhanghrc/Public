@@ -1,0 +1,4 @@
+# Client-side requirements for deploying/testing the phase2 Modal stack.
+# Install in your local environment (not inside the Modal images):
+#   pip install -r modal/requirements.txt
+modal

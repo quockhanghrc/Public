@@ -145,6 +145,7 @@ def ask(prompt: str, request: Request,
 
 @app.post("/ask-stream")
 def ask_stream(prompt: str, request: Request,
+        max_tokens: int = Query(200, ge=1, le=MAX_TOKENS_LIMIT),
         authorization: str | None = Header(None)):
     check_auth(authorization)
     def generate():
@@ -152,7 +153,7 @@ def ask_stream(prompt: str, request: Request,
             stream = client.chat.completions.create(
                 model=MODEL_NAME,
                 messages=build_messages(prompt),
-                max_tokens=200,
+                max_tokens=max_tokens,
                 temperature=0.7,
                 stream=True,
             )

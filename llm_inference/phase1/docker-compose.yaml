@@ -11,6 +11,11 @@ services:
     ports:
       - "8000:8000"                        # vLLM's own API (you can hit it directly too)
     shm_size: 2gb
+    deploy:
+      resources:
+        limits:
+          cpus: '10'
+          memory: 6g
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/v1/models"]
       interval: 30s
@@ -26,6 +31,7 @@ services:
     environment:
       - VLLM_URL=http://vllm:8000/v1       # service name, NOT localhost
       - API_KEY=${API_KEY:-secret-key}     # for your app's own auth (optional)
+      - MODEL_NAME=${MODEL_NAME:-chat-model}   # swap served model without code changes
     depends_on:
       vllm:
         condition: service_healthy         # wait until vLLM is actually up

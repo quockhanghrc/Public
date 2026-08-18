@@ -5,7 +5,6 @@ served-model-name: chat-model              # what clients call it in requests
 # Precision / memory (your notes: quantization topic)
 dtype: bfloat16
 max-model-len: 2048                        # context cap → bounds KV cache
-quantization: awq
 
 # Batching / throughput (your notes: latency-throughput tradeoff)
 max-num-seqs: 16                           # ceiling on concurrent requests

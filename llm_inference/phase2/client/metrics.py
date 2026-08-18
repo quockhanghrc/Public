@@ -2,7 +2,10 @@ import os
 import time
 import urllib.request
 
-METRICS_URL = "http://localhost:8000/metrics"
+# Point at the phase2 vLLM Modal web URL, e.g.
+#   METRICS_URL=https://<workspace>--phase2-vllm-gpu-serve.modal.run/metrics \
+#       python client/metrics.py
+METRICS_URL = os.environ.get("METRICS_URL", "http://localhost:8000/metrics")
 NUM_PARAMS = float(os.environ.get("NUM_PARAMS", "0.494e9"))  # Qwen2.5-0.5B-Instruct
 
 def fetch_metrics():
@@ -10,10 +13,14 @@ def fetch_metrics():
         return resp.read().decode()
 
 def get_value(lines, name):
+    """Parse a Prometheus gauge line: `name{labels} value` or `name value`."""
     for line in lines:
-        if line.startswith(name + "{"):
-            return float(line.split("} ")[1])
+        if line.startswith((name + "{", name + " ")):
+            return float(line.rsplit(" ", 1)[1])
     return 0.0
+
+def has_metric(lines, name):
+    return any(l.startswith((name + "{", name + " ")) for l in lines)
 
 def main():
     text = fetch_metrics()
@@ -54,6 +61,36 @@ def main():
     print(f"  running requests   : {running:.0f}")
     print("=== KV Cache ===")
     print(f"  usage              : {kv_usage * 100:.1f}%")
+
+    # --- GPU + container metrics (phase2, exposed by the metrics gateway) ---
+    gpu_util = get_value(lines, "vllm_container_gpu_utilization_percent")
+    gpu_mem_used = get_value(lines, "vllm_container_gpu_memory_used_bytes")
+    gpu_mem_total = get_value(lines, "vllm_container_gpu_memory_total_bytes")
+    gpu_temp = get_value(lines, "vllm_container_gpu_temperature_celsius")
+    gpu_power = get_value(lines, "vllm_container_gpu_power_watts")
+    gpu_fan = get_value(lines, "vllm_container_gpu_fan_percent")
+    gpu_kv = get_value(lines, "vllm:gpu_cache_usage_perc")
+    preemptions = get_value(lines, "vllm:num_preemptions_total")
+    cpu_pct = get_value(lines, "vllm_container_cpu_percent")
+    mem_used = get_value(lines, "vllm_container_memory_used_bytes")
+    mem_total = get_value(lines, "vllm_container_memory_total_bytes")
+
+    if has_metric(lines, "vllm_container_gpu_utilization_percent"):
+        print("=== GPU ===")
+        print(f"  utilization        : {gpu_util:.0f}%")
+        if gpu_mem_total:
+            print(f"  memory used        : {gpu_mem_used / 1e9:.2f} / {gpu_mem_total / 1e9:.2f} GiB")
+        print(f"  temperature        : {gpu_temp:.0f} C")
+        print(f"  power              : {gpu_power:.0f} W")
+        if gpu_fan >= 0:
+            print(f"  fan                : {gpu_fan:.0f}%")
+        print(f"  KV cache (GPU)     : {gpu_kv * 100:.1f}%")
+        print(f"  preemptions        : {preemptions:.0f}")
+    if has_metric(lines, "vllm_container_cpu_percent"):
+        print("=== Container ===")
+        print(f"  cpu                : {cpu_pct:.1f}%")
+        if mem_total:
+            print(f"  memory             : {mem_used / 1e9:.2f} / {mem_total / 1e9:.2f} GiB")
 
 if __name__ == "__main__":
     main()

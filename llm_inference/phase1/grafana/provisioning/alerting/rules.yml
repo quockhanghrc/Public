@@ -1,0 +1,73 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: vllm-alerts
+    folder: vllm-alerts
+    interval: 1m
+    rules:
+      - uid: vllm-kv-cache-high
+        title: KV cache usage high
+        condition: B
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "KV cache usage is above 80%"
+          description: "Current KV cache usage: {{ $values.A }}"
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              refId: A
+              expr: vllm:kv_cache_usage_perc
+              instant: true
+              range: false
+          - refId: B
+            datasourceUid: __expr__
+            type: threshold
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [0.8]
+                  operator:
+                    type: and
+      - uid: vllm-ttft-p99-high
+        title: TTFT p99 high
+        condition: B
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "TTFT p99 exceeds 30s"
+          description: "Current TTFT p99: {{ $values.A }}s"
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              refId: A
+              expr: histogram_quantile(0.99, sum by (le) (rate(vllm:time_to_first_token_seconds_bucket[1m])))
+              instant: true
+              range: false
+          - refId: B
+            datasourceUid: __expr__
+            type: threshold
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [30]
+                  operator:
+                    type: and
