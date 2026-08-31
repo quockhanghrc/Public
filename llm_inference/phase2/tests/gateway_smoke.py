@@ -9,6 +9,7 @@ import os
 import sys
 import threading
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -17,6 +18,9 @@ sys.path.insert(0, str(MODAL_DIR))
 os.environ["GATEWAY_PORT"] = "8000"
 os.environ["UPSTREAM_HOST"] = "127.0.0.1"
 os.environ["UPSTREAM_PORT"] = "8001"
+# Opt-in: exercise the 401/200 bearer-token guard on /metrics (the gateway only
+# enforces auth when METRICS_TOKEN is set).
+os.environ["METRICS_TOKEN"] = "smoke-test-token"
 
 import metrics_gateway
 
@@ -74,22 +78,34 @@ def main():
     threading.Thread(target=metrics_gateway.main, daemon=True).start()
     time.sleep(1.0)
 
-    # 1. /health proxied
+    # 1. /health proxied (no token needed — auth only guards /metrics)
     with urllib.request.urlopen(f"http://127.0.0.1:{GATEWAY_PORT}/health") as r:
         assert r.status == 200, r.status
         assert b"ok" in r.read(), "health body"
 
-    # 2. /metrics merged with container metrics
-    with urllib.request.urlopen(f"http://127.0.0.1:{GATEWAY_PORT}/metrics") as r:
+    # 2. /metrics without token -> 401
+    try:
+        urllib.request.urlopen(f"http://127.0.0.1:{GATEWAY_PORT}/metrics")
+        raise AssertionError("metrics should require a token")
+    except urllib.error.HTTPError as e:
+        assert e.code == 401, e.code
+
+    # 3. /metrics with token -> 200 + merged
+    with urllib.request.urlopen(
+        urllib.request.Request(
+            f"http://127.0.0.1:{GATEWAY_PORT}/metrics",
+            headers={"Authorization": "Bearer smoke-test-token"},
+        )
+    ) as r:
         text = r.read().decode()
         assert "vllm:gpu_cache_usage_perc" in text, "vllm metric present"
         assert "vllm_container_cpu_percent" in text, "container metric merged"
 
-    # 3. streaming endpoint stays chunked / SSE
+    # 4. streaming endpoint stays chunked / SSE (no token needed)
     with urllib.request.urlopen(f"http://127.0.0.1:{GATEWAY_PORT}/v1/chat/completions") as r:
         assert b"hi" in r.read(), "stream content"
 
-    # 4. POST body forwarding
+    # 5. POST body forwarding (no token needed)
     req = urllib.request.Request(
         f"http://127.0.0.1:{GATEWAY_PORT}/v1/completions",
         data=b'{"prompt":"x"}',

@@ -7,9 +7,14 @@ import urllib.request
 #       python client/metrics.py
 METRICS_URL = os.environ.get("METRICS_URL", "http://localhost:8000/metrics")
 NUM_PARAMS = float(os.environ.get("NUM_PARAMS", "0.494e9"))  # Qwen2.5-0.5B-Instruct
+# Optional bearer token for /metrics (set when deployed with METRICS_TOKEN).
+METRICS_TOKEN = os.environ.get("METRICS_TOKEN")
 
 def fetch_metrics():
-    with urllib.request.urlopen(METRICS_URL) as resp:
+    req = urllib.request.Request(METRICS_URL)
+    if METRICS_TOKEN:
+        req.add_header("Authorization", f"Bearer {METRICS_TOKEN}")
+    with urllib.request.urlopen(req) as resp:
         return resp.read().decode()
 
 def get_value(lines, name):

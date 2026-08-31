@@ -53,6 +53,7 @@ VLLM_CACHE_VOL = modal.Volume.from_name(
 )
 
 _api_key = os.environ.get("API_KEY")
+_metrics_token = os.environ.get("METRICS_TOKEN")
 
 
 # --------------------------------------------------------------------------
@@ -164,6 +165,10 @@ def _start_gateway() -> subprocess.Popen:
     env["UPSTREAM_HOST"] = "127.0.0.1"
     env["UPSTREAM_PORT"] = str(config.VLLM_INTERNAL_PORT)
     env["UPSTREAM_TIMEOUT"] = str(config.UPSTREAM_TIMEOUT_S)
+    if _metrics_token:
+        # Bake the deploy-time token into the gateway subprocess (Modal does not
+        # pass client env into the container at runtime).
+        env["METRICS_TOKEN"] = _metrics_token
     return subprocess.Popen(["python", "/opt/modal/metrics_gateway.py"], env=env)
 
 
@@ -247,6 +252,8 @@ _web_kwargs = {
 _web_kwargs["secrets"] = [modal.Secret.from_dict({"MODAL_HARDWARE": config.HARDWARE})]
 if _api_key:
     _web_kwargs["secrets"].append(modal.Secret.from_dict({"API_KEY": _api_key}))
+if _metrics_token:
+    _web_kwargs["secrets"].append(modal.Secret.from_dict({"METRICS_TOKEN": _metrics_token}))
 
 
 @api_app.function(**_web_kwargs)

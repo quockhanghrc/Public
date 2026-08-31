@@ -21,6 +21,11 @@ WORKSPACE = os.environ.get("MODAL_WORKSPACE", "quockhang-hrc")
 API_KEY = os.environ.get("API_KEY", "secret-key")
 API_BASE = os.environ.get("BASE_URL", f"https://{WORKSPACE}--phase2-api-web.modal.run")
 
+# Bearer token protecting /metrics on both deployed endpoints (set by deploy.py
+# when METRICS_TOKEN was present at deploy time). Optional: when unset, the
+# fetchers make unauthenticated requests (local/unauth deployments).
+METRICS_TOKEN = os.environ.get("METRICS_TOKEN")
+
 COLD_START_BUDGET_S = int(os.environ.get("COLD_START_BUDGET_S", "300"))
 
 
@@ -54,6 +59,10 @@ def api_headers() -> dict:
     return {"Authorization": f"Bearer {API_KEY}"}
 
 
+def metrics_headers() -> dict:
+    return {"Authorization": f"Bearer {METRICS_TOKEN}"} if METRICS_TOKEN else {}
+
+
 def api_json(method: str, path: str, **kwargs) -> dict:
     r = requests.request(method, f"{API_BASE}{path}", headers=api_headers(), timeout=180, **kwargs)
     r.raise_for_status()
@@ -82,7 +91,7 @@ def api_stream_text(path: str, params: dict) -> str:
 
 
 def api_metrics_text() -> str:
-    r = requests.get(f"{API_BASE}/metrics", timeout=60)
+    r = requests.get(f"{API_BASE}/metrics", headers=metrics_headers(), timeout=60)
     r.raise_for_status()
     return r.text
 
@@ -97,7 +106,8 @@ def fetch_metrics(hardware: str) -> list[str]:
     last: Exception | None = None
     for _ in range(3):
         try:
-            with urllib.request.urlopen(vllm_metrics_url(hardware), timeout=120) as resp:
+            req = urllib.request.Request(vllm_metrics_url(hardware), headers=metrics_headers())
+            with urllib.request.urlopen(req, timeout=120) as resp:
                 text = resp.read().decode()
             return [line for line in text.splitlines() if line and not line.startswith("#")]
         except OSError as exc:

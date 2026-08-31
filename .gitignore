@@ -64,6 +64,7 @@ Thumbs.db
 *.joblib
 *.base
 *.test
+*.log
 u.data
 u.genre
 u.info

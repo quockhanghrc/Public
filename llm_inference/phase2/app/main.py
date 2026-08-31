@@ -5,7 +5,7 @@ import uuid
 
 import httpx
 from fastapi import FastAPI, Header, HTTPException, Query, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from openai import APIConnectionError, APIError, APITimeoutError, OpenAI
 from prometheus_fastapi_instrumentator import Instrumentator
 
@@ -18,6 +18,11 @@ logger = logging.getLogger("myapp")
 VLLM_URL = os.environ.get("VLLM_URL", "http://localhost:8000/v1")
 MODEL_NAME = os.environ.get("MODEL_NAME", "chat-model")
 API_KEY = os.environ.get("API_KEY", "secret-key")
+# Opt-in bearer token for /metrics (Grafana Cloud Metrics Endpoint scraping
+# requires auth on the target URL). When set, /metrics returns 401 without a
+# valid `Authorization: Bearer <token>`; when unset, /metrics stays open
+# (local dev / unit tests unchanged).
+METRICS_TOKEN = os.environ.get("METRICS_TOKEN")
 MAX_TOKENS_LIMIT = int(os.environ.get("MAX_TOKENS_LIMIT", "2048"))
 REQUEST_TIMEOUT = float(os.environ.get("REQUEST_TIMEOUT", "300.0"))
 
@@ -51,6 +56,14 @@ async def log_requests(request: Request, call_next):
         (time.time() - start) * 1000,
     )
     return response
+
+
+@app.middleware("http")
+async def metrics_auth(request: Request, call_next):
+    if METRICS_TOKEN and request.url.path == "/metrics":
+        if request.headers.get("Authorization") != f"Bearer {METRICS_TOKEN}":
+            return JSONResponse(status_code=401, content={"detail": "Invalid metrics token"})
+    return await call_next(request)
 
 
 def build_messages(user_text: str) -> list[dict]:

@@ -37,6 +37,11 @@ except ImportError:  # graceful degradation
 GATEWAY_PORT = int(os.environ.get("GATEWAY_PORT", "8000"))
 UPSTREAM_HOST = os.environ.get("UPSTREAM_HOST", "127.0.0.1")
 UPSTREAM_PORT = int(os.environ.get("UPSTREAM_PORT", "8001"))
+# Opt-in bearer token for /metrics (Grafana Cloud Metrics Endpoint scraping
+# requires auth on the target URL). When set, /metrics returns 401 without a
+# valid `Authorization: Bearer <token>`; when unset, /metrics stays open
+# (local dev / unit tests unchanged). All other proxied paths are untouched.
+METRICS_TOKEN = os.environ.get("METRICS_TOKEN")
 # Upper bound for a single upstream request. CPU inference is slow enough that
 # the old fixed 120s cap caused 502s on long generations; the deployer sets a
 # larger value for the CPU profile.
@@ -236,6 +241,14 @@ def _proxy_request(handler: "http.server.BaseHTTPRequestHandler") -> None:
     path = url.path or "/"
     if url.query:
         path = f"{path}?{url.query}"
+
+    if METRICS_TOKEN and (path == "/metrics" or path.startswith("/metrics?")):
+        if handler.headers.get("Authorization") != f"Bearer {METRICS_TOKEN}":
+            handler.send_response(401)
+            handler.send_header("Content-Type", "text/plain")
+            handler.send_header("Content-Length", "0")
+            handler.end_headers()
+            return
 
     conn = http.client.HTTPConnection(UPSTREAM_HOST, UPSTREAM_PORT, timeout=UPSTREAM_TIMEOUT)
     length = int(handler.headers.get("Content-Length", 0) or 0)

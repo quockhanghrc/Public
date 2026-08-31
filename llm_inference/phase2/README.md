@@ -155,6 +155,14 @@ The GPU suite asserts the `vllm_container_gpu_*` gauges are present; the CPU
 suite asserts the same gauges are **absent** (graceful degradation). Both hit
 `/health`, `/ask`, `/ask-stream` and `/metrics` end-to-end.
 
+> If the stack was deployed with `METRICS_TOKEN` set (required for Grafana
+> Cloud), run the deployed tests with the **same** token or the `/metrics`
+> fetches will 401:
+>
+> ```bash
+> METRICS_TOKEN=<your-token> python -m pytest phase2/tests/test_deployed_gpu.py -m integration
+> ```
+
 **Verified test matrix** (Modal workspace `quockhang-hrc`, all apps at
 `max_containers: 1`):
 
@@ -187,9 +195,23 @@ METRICS_URL=https://your-workspace--phase2-vllm-gpu-vllmserver-serve.modal.run/m
 
 ### 5. Monitoring + Grafana dashboard
 
-Prometheus + Grafana run **anywhere** (local Docker, a VM, ...). There is no
-node-exporter — the phase1 "Host CPU/Memory" panels were replaced with
-container-level ones, and the vLLM `/metrics` URL now carries the GPU gauges.
+**Recommended — Grafana Cloud (no local storage).** The Modal `/metrics`
+endpoints are scraped directly by the Grafana Cloud **Metrics Endpoint**
+integration; no local Prometheus/Grafana needed. Follow
+[`monitoring/grafana-cloud/README.md`](monitoring/grafana-cloud/README.md).
+Grafana Cloud requires **auth on the scrape target**, so deploy with a
+`METRICS_TOKEN` (opt-in bearer token that guards `/metrics` on both services):
+
+```bash
+export METRICS_TOKEN=<your-token>
+MODEL_NAME=meta-llama/Llama-3.2-3B-Instruct             modal deploy phase2/modal/deploy.py::vllm_app
+MODEL_NAME=meta-llama/Llama-3.2-3B-Instruct             modal deploy phase2/modal/deploy.py::api_app
+```
+
+Without `METRICS_TOKEN` the endpoints stay open (local dev / unit tests) and
+Grafana Cloud will reject the scrape jobs — use the local stack below instead.
+
+**Local alternative (docker compose)** — documented, keeps working as before:
 
 ```bash
 cd phase2/monitoring
@@ -345,6 +367,7 @@ python phase2/tests/gateway_smoke.py       # proxy + metrics-merge check (psutil
 | `MODEL_NAME` | `Qwen/Qwen2.5-0.5B-Instruct` | HF model id (gated models use `hf-token-secret`) |
 | `SERVED_MODEL_NAME` | `chat-model` | name clients send in requests |
 | `API_KEY` | unset → `secret-key` | Bearer token for `/ask*` |
+| `METRICS_TOKEN` | unset → metrics open | Bearer token for `/metrics` (opt-in; required for Grafana Cloud scraping) |
 | `VLLM_GPU_VERSION` | `0.21.0` | vLLM version in the GPU image |
 | `MAX_MODEL_LEN` | `2048` | max model context length |
 | `ENABLE_PREFIX_CACHING` | `true` | pass `--enable-prefix-caching` to vLLM |

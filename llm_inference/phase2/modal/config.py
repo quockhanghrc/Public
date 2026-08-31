@@ -14,6 +14,8 @@ MODAL_CPU_MEMORY  container memory for the CPU vLLM function, MiB (default 12288
 MODAL_CPU_KVCACHE_GB  vLLM CPU KV-cache cap in GiB (default 4; without this
                  vLLM auto-sizes KV cache to host RAM and blows the limit)
 MODAL_WORKSPACE  workspace suffix, only used to keep app names unique
+METRICS_TOKEN    optional bearer token protecting /metrics (Grafana Cloud
+                 scraping requires auth on the target URL); unset -> open
 """
 
 import os
