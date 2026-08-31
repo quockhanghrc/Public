@@ -19,6 +19,7 @@ recommendations/MIND/cache/
 00_utils/
 /artifacts/*
 artifacts/
+recommendations/
 runs/
 data/
 ref/

@@ -1,0 +1,11 @@
+obp==0.4.1
+mabwiser==2.7.4
+pandas
+scikit-learn
+pyarrow
+nbformat
+pytest
+jupyter
+joblib
+matplotlib
+lightgbm
