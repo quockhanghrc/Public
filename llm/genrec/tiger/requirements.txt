@@ -1,0 +1,12 @@
+# Installed/verified compute set for the tiger/ venv (Python 3.11).
+# torch: install from the CPU index to avoid the multi-GB CUDA default wheel:
+#   uv pip install --python .venv/Scripts/python.exe "torch==2.14.0" --index-url https://download.pytorch.org/whl/cpu
+# (or the CUDA index if training on GPU). Then the rest below via `uv pip install -r requirements.txt`.
+torch==2.14.0
+transformers==4.57.6
+sentence-transformers==3.4.1
+numpy==2.4.6
+scikit-learn==1.9.0
+pandas==3.0.5
+murmurhash==1.0.15
+tensorboard==2.21.0

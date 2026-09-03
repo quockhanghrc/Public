@@ -1,0 +1,27 @@
+# TIGER full-run results — Modal T4 (transformers 4.57.6, num_beams=100)
+Run id: ap-T0goUwAHskqtiFTVXjr9sD
+Config : configs/tiger_t4_config.json
+Data   : full Amazon Beauty 5-core (131,413 train seqs / 22,363 users / 12,101 items),
+         Embeddings = Sentence-T5 (sentence-t5-base, 768-d), Tokenizer = RQ-KMeans (256 x 3 + collision)
+
+## Final FULL-TEST metrics (eval after 12,288 steps)
+ndcg@5   0.02112
+ndcg@10  0.02760
+ndcg@20  0.03458
+recall@5  0.03233
+recall@10 0.05254
+recall@20 0.08027
+
+## Training setup actually run
+- train_steps_num: 12,000 (ran 12,288 to finish the epoch)
+- valid_step / eval_step: 2,048 (6 periodic eval rounds + 1 final)
+- num_beams=100, top_k=20; batch 256/128; AdamW lr 3e-4; T5 dim 128, 6 heads, 4+4 layers
+- GPU: Tesla T4 (16 GB); ~2.1 h wall
+
+## Context / comparison (Beauty)
+Reference (nonameuntitled, RQ-VAE + LLaMA-7B embeddings) TIGER:  NDCG@20 0.03940, Recall(H)@20 0.08800
+Reference SASRec:                                              H@20    0.08071
+This run (Sentence-T5 + RQ-KMeans):                             NDCG@20 0.03458, Recall@20 0.08027
+=> Reaches ~88% of reference NDCG@20 and ~91% of reference Recall@20.
+   Recall@20 ≈ reference SASRec baseline (0.0803 vs 0.0807).
+   Absolute numbers are NOT directly comparable to the reference (different tokenizer + embeddings).
