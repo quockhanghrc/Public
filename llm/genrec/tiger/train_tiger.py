@@ -141,6 +141,9 @@ def main():
     LOGGER.debug('Training finished!')
     LOGGER.debug('Final evaluation is being performed...')
 
+    import gc
+    gc.collect()
+    torch.cuda.empty_cache()
     trainer.load(best_checkpoint)
     trainer.eval()
 

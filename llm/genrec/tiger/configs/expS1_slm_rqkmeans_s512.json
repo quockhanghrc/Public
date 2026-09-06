@@ -1,0 +1,36 @@
+{
+  "experiment_name": "expS1",
+  "slm_id": "Qwen/Qwen2.5-1.5B",
+  "dataset": {
+    "inter_json_path": "data/inter.json",
+    "index_json_path": "data/index_rqkmeans_s512.json",
+    "num_codebooks": 4,
+    "max_sequence_length": 20,
+    "sampler_type": "tiger"
+  },
+  "dataloader": {
+    "train_batch_size": 8,
+    "validation_batch_size": 8
+  },
+  "model": {
+    "codebook_size": 256,
+    "num_beams": 50,
+    "top_k": 20
+  },
+  "lora": {
+    "r": 16,
+    "alpha": 32,
+    "dropout": 0.05
+  },
+  "optimizer": {
+    "lr": 0.0003
+  },
+  "train_steps_num": 12000,
+  "valid_step": 2048,
+  "eval_step": 2048,
+  "log_steps": 50,
+  "eval_subset": 600,
+  "early_stop_period": 2000,
+  "early_stop_patience": 3,
+  "early_stop_check": 64
+}

@@ -138,6 +138,11 @@ class Trainer:
                     )
                     sw = now
 
+                # Honor the step cap mid-epoch (previously only checked between full epochs,
+                # so a small cap like a smoke's 60 steps overshot to an entire epoch).
+                if self._step_cnt is not None and step_num >= max_steps:
+                    break
+
                 # Update best checkpoint
                 if self._best_metric is None:  # If no best metric is provided last checkpoint is taken
                     best_checkpoint = copy.deepcopy(self._model.state_dict())

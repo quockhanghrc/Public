@@ -1,5 +1,5 @@
 # TIGER full-run results — Modal T4 (transformers 4.57.6, num_beams=100)
-Run id: ap-T0goUwAHskqtiFTVXjr9sD
+Run id: <redacted>
 Config : configs/tiger_t4_config.json
 Data   : full Amazon Beauty 5-core (131,413 train seqs / 22,363 users / 12,101 items),
          Embeddings = Sentence-T5 (sentence-t5-base, 768-d), Tokenizer = RQ-KMeans (256 x 3 + collision)

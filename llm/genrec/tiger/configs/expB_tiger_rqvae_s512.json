@@ -1,0 +1,38 @@
+{
+  "experiment_name": "expB",
+  "dataset": {
+    "inter_json_path": "data/inter.json",
+    "index_json_path": "data/index_rqvae_s512.json",
+    "num_codebooks": 4,
+    "max_sequence_length": 20,
+    "sampler_type": "tiger"
+  },
+  "dataloader": {
+    "train_batch_size": 256,
+    "validation_batch_size": 64
+  },
+  "model": {
+    "embedding_dim": 128,
+    "codebook_size": 256,
+    "num_positions": 20,
+    "user_ids_count": 2000,
+    "num_heads": 6,
+    "num_encoder_layers": 4,
+    "num_decoder_layers": 4,
+    "dim_feedforward": 1024,
+    "d_kv": 64,
+    "dropout": 0.1,
+    "activation": "relu",
+    "num_beams": 50,
+    "top_k": 20,
+    "layer_norm_eps": 1e-6,
+    "initializer_range": 0.02
+  },
+  "optimizer": {
+    "lr": 0.0003
+  },
+  "train_steps_num": 12000,
+  "valid_step": 2048,
+  "eval_step": 2048,
+  "log_steps": 256
+}

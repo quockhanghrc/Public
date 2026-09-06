@@ -1,5 +1,9 @@
 import json
+import math
+import os
+import pickle
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
@@ -14,6 +18,34 @@ from modeling.utils import parse_args, create_logger, fix_random_seed
 
 LOGGER = create_logger(name=__name__)
 SEED_VALUE = 42
+
+
+def content_init_item_embeddings(model, emb_path="data/content_embeddings_s512.pkl"):
+    """Seed SasRecModel._item_embeddings from Sentence-T5 S512 content embeddings (expC2).
+
+    Projects 768-dim content -> embedding_dim with a fixed random projection, row-normalizes,
+    and assigns by item id. Returns True if applied. Pure init (no-op) otherwise.
+    """
+    if not os.path.exists(emb_path):
+        print(f"[expC2] content embeddings not found at {emb_path}; skipping seeding", flush=True)
+        return False
+    with open(emb_path, "rb") as f:
+        d = pickle.load(f)
+    ids = np.array(d["item_id"], dtype=np.int64)
+    E = np.array(d["embedding"], dtype=np.float32)                 # (N, 768)
+    W = model._item_embeddings.weight                              # (num_items, emb_dim)
+    rng = np.random.default_rng(0)
+    P = rng.normal(0.0, 1.0 / math.sqrt(E.shape[1]),
+                   (E.shape[1], W.shape[1])).astype(np.float32)     # (768, emb_dim)
+    proj = E @ P
+    norms = np.linalg.norm(proj, axis=1, keepdims=True) + 1e-8
+    proj = proj / norms
+    with torch.no_grad():
+        for i, item_id in enumerate(ids[: W.shape[0]]):
+            if item_id < W.shape[0]:
+                W.data[item_id] = torch.FloatTensor(proj[i])
+    print(f"[expC2] content-init item embeddings applied ({ids.shape[0]} items)", flush=True)
+    return True
 
 
 def main():
@@ -73,6 +105,9 @@ def main():
         layer_norm_eps=config['model']['layer_norm_eps'],
         initializer_range=config['model']['initializer_range']
     ).to(utils.DEVICE)
+
+    if str(config['experiment_name']).startswith('expC2'):
+        content_init_item_embeddings(model)
 
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)

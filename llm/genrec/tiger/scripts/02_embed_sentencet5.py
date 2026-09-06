@@ -36,13 +36,13 @@ print(f"embedding {len(ids)} items with {MODEL} @ max_seq={MAX_SEQ} ...")
 model = SentenceTransformer(
     MODEL, cache_folder=os.path.join(_CACHE, "sentence_transformers")
 )
+model.max_seq_length = MAX_SEQ  # version-agnostic truncation (encode(max_seq_length=) was removed in ST 6.x)
 embeds = model.encode(
     strs,
     batch_size=BATCH,
     convert_to_numpy=True,
     normalize_embeddings=False,
     show_progress_bar=True,
-    max_seq_length=MAX_SEQ,
 )
 embeds = embeds.astype(np.float32)
 print("embedding shape:", embeds.shape)

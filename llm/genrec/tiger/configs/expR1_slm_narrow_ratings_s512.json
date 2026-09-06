@@ -1,0 +1,31 @@
+{
+  "experiment_name": "expR1_ratings",
+  "slm_id": "Qwen/Qwen2.5-0.5B",
+  "dataset": {
+    "inter_json_path": "data/inter.json",
+    "index_json_path": "data/index_rqkmeans_s512.json",
+    "ratings_json_path": "data/ratings.json",
+    "num_codebooks": 4,
+    "codebook_size": 256,
+    "max_sequence_length": 20
+  },
+  "model": {
+    "codebook_size": 256,
+    "num_beams": 50,
+    "top_k": 20,
+    "lora_r": 16,
+    "lora_alpha": 32
+  },
+  "optimizer": {
+    "lr": 0.0003
+  },
+  "train_steps_num": 12000,
+  "eval_step": 1000,
+  "eval_mid_subset": 50,
+  "eval_subset": 200,
+  "log_steps": 50,
+  "dataloader": {
+    "train_batch_size": 8,
+    "validation_batch_size": 8
+  }
+}
